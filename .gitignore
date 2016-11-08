@@ -15,7 +15,7 @@
 *.lo
 
 # Shared objects (inc. Windows DLLs)
-*.dll
+#*.dll
 *.so
 *.so.*
 *.dylib
@@ -31,3 +31,6 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Stuff
+*.pdb
