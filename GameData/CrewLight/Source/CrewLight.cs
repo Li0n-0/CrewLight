@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CrewLight
@@ -16,18 +17,96 @@ namespace CrewLight
 		 * 
 		 */
 
-		public void Start () {
+		public void Start () 
+		{
 			GameEvents.onCrewTransferred.Add (UpdateLight);
 			GameEvents.onVesselChange.Add (StartLight);
+			GameEvents.onVesselGoOffRails.Add (LightOnAnotherVessel);// For the distant illumination
 			StartCoroutine ("RoutineLight");
 		}
 
-		public void OnDestroy () {
+		public void OnDestroy () 
+		{
 			GameEvents.onCrewTransferred.Remove (UpdateLight);
 			GameEvents.onVesselChange.Remove (StartLight);
+			GameEvents.onVesselGoOffRails.Remove (LightOnAnotherVessel);// For the distant illumination
 		}
 
-		IEnumerator RoutineLight () {
+		void LightOnAnotherVessel (Vessel vessel) 
+		{
+			if (vessel != FlightGlobals.ActiveVessel) {
+				Debug.Log ("[Crew Light] : Find another vessel : " + vessel.name);
+				System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+				stopWatch.Start ();
+				List<Part> partWithLight = vessel.Parts.FindAll (p => 
+					p.Modules.Contains<ModuleColorChanger> () ||
+					p.Modules.Contains<ModuleAnimateGeneric> () ||
+					p.Modules.Contains<ModuleLight> () ||
+					p.Modules.Contains ("WBILight"));
+				stopWatch.Stop ();
+				Debug.Log ("[Crew Light] : Checking all the parts on " + vessel.name + " takes " + stopWatch.ElapsedMilliseconds);
+				Debug.Log ("[Crew Light] : Start Blinking thingy");
+				StartCoroutine (BlinkLight (partWithLight));
+			}
+
+//			if (vessel != FlightGlobals.ActiveVessel) {
+//				StartCoroutine (BlinkLight (vessel.Parts.FindAll (p => 
+//					p.Modules.Contains<ModuleColorChanger> () ||
+//					p.Modules.Contains<ModuleAnimateGeneric> () ||
+//					p.Modules.Contains<ModuleLight> () ||
+//					p.Modules.Contains ("WBILight"))));
+//			}
+		}
+		/* 
+		 * Seems to basically work,
+		 * need to check for crewed part at the end
+		 * need to register the state of the light before blinking them and set it back when done
+		 */
+		IEnumerator BlinkLight (List<Part> distPartList) 
+		{
+//			Debug.Log ("[Crew Light] : Start blinking thing, time is : " + Time.time);
+			for (int i = 0 ; i < 2 ; i++) {
+				foreach (Part part in distPartList) {
+					if (part.Modules.Contains<ModuleColorChanger>()) {
+						if (part.Modules.GetModule<ModuleColorChanger>().animState == false) {
+							part.Modules.GetModule<ModuleColorChanger> ().ToggleEvent ();
+						}
+					}
+					if (part.Modules.Contains<ModuleAnimateGeneric>()) {
+						foreach(ModuleAnimateGeneric anim in part.Modules.GetModules<ModuleAnimateGeneric>()) {
+							if ((anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == true) {
+								anim.Toggle ();
+							}
+						}
+					}
+					if (part.Modules.Contains<ModuleLight>()) {
+						part.Modules.GetModule<ModuleLight> ().LightsOn ();
+					}
+				}
+				yield return new WaitForSeconds (.7f);
+				foreach (Part part in distPartList) {
+					if (part.Modules.Contains<ModuleColorChanger>()) {
+						part.Modules.GetModule<ModuleColorChanger> ().ToggleEvent ();
+					}
+					if (part.Modules.Contains<ModuleAnimateGeneric>()) {
+						foreach(ModuleAnimateGeneric anim in part.Modules.GetModules<ModuleAnimateGeneric>()) {
+							if (anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") {
+								anim.Toggle ();
+							}
+						}
+					}
+					if (part.Modules.Contains<ModuleLight>()) {
+						part.Modules.GetModule<ModuleLight> ().LightsOff ();
+					}
+				}
+				yield return new WaitForSeconds(.7f);
+			}
+
+//			Debug.Log ("[Crew Light] : Finish blinking thing, time is : " + Time.time);
+		}
+
+		IEnumerator RoutineLight () 
+		{
 			Vessel vessel = FlightGlobals.ActiveVessel;
 			if (vessel.crewedParts != 0 && vessel.isEVA == false) {
 				yield return new WaitForSeconds (.1f);
@@ -35,13 +114,15 @@ namespace CrewLight
 			}
 		}
 
-		private void UpdateLight (GameEvents.HostedFromToAction<ProtoCrewMember, Part> eData) {
+		private void UpdateLight (GameEvents.HostedFromToAction<ProtoCrewMember, Part> eData) 
+		{
 			/* Update the status of the lights when a Kerbal moves */
 			Light (eData.to);
 			LightOff (eData.from);
 		}
 
-		private void EVALight (GameEvents.FromToAction<Part, Part> eData) {
+		private void EVALight (GameEvents.FromToAction<Part, Part> eData) 
+		{
 			/* Triggered when a kerbal leave a pod by EVA */
 			LightOff (eData.from);
 		}
@@ -88,6 +169,7 @@ namespace CrewLight
 				foreach (PartModule partM in part.Modules) {
 					if (partM.ClassName == "WBILight") {
 						partM.SendMessage ("TurnOnLights");
+
 					}
 				}
 			}
