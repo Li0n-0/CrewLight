@@ -341,18 +341,18 @@ namespace CrewLight
 //			Debug.Log ("[Crew Light] : Turning off all the lights on the distant vessel");
 			// Turning all the lights off before Morse blinking
 			AllLightsOff (lightModules);
-			yield return new WaitForSeconds (settings.tiDuration);
+			yield return new WaitForSeconds (settings.ditDuration);
 //			Debug.Log ("[Crew Light] : Morse message");
 			// Morse message
 			foreach (int c in settings.morseCode) {
 				switch (c) {
 				case 0:
 					AllLightsOn (lightModules);
-					yield return new WaitForSeconds (settings.tiDuration);
+					yield return new WaitForSeconds (settings.ditDuration);
 					break;
 				case 1:
 					AllLightsOn (lightModules);
-					yield return new WaitForSeconds (settings.taahDuration);
+					yield return new WaitForSeconds (settings.dahDuration);
 					break;
 				case 2:
 					AllLightsOff (lightModules);

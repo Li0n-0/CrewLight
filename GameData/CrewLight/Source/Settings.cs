@@ -15,8 +15,8 @@ namespace CrewLight
 		public bool onlyForControllable = false;
 		public string morseCodeStr = "_._|...|.__.";
 		public double distance = 200d;
-		public float tiDuration = .9f;
-		public float taahDuration = 2f;
+		public float ditDuration = .9f;
+		public float dahDuration = 2f;
 		public float symbolSpaceDuration = 1f;
 		public float letterSpaceDuration = 1.3f;
 		public float wordSpaceDuration = 1.7f;
@@ -64,8 +64,8 @@ namespace CrewLight
 				"only_for_controllable_vessel",
 				"morse_code",
 				"distance",
-				"ti",
-				"taah",
+				"dit",
+				"dah",
 				"symbol_space",
 				"letter_space",
 				"word_space"
@@ -78,8 +78,8 @@ namespace CrewLight
 				onlyForControllable = bool.Parse (nodeDistantVesselLight.GetValue("only_for_controllable_vessel"));
 				morseCodeStr = nodeDistantVesselLight.GetValue ("morse_code");
 				distance = Double.Parse(nodeDistantVesselLight.GetValue ("distance"));
-				tiDuration = float.Parse (nodeDistantVesselLight.GetValue ("ti"));
-				taahDuration = float.Parse (nodeDistantVesselLight.GetValue ("taah"));
+				ditDuration = float.Parse (nodeDistantVesselLight.GetValue ("dit"));
+				dahDuration = float.Parse (nodeDistantVesselLight.GetValue ("dah"));
 				symbolSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("symbol_space"));
 				letterSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("letter_space"));
 				wordSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("word_space"));
@@ -120,11 +120,11 @@ namespace CrewLight
 			nodeDistantVesselLight.AddValue ("distance", distance, 
 				"distance at which the message begin, in meter, maximum 200");
 			
-			nodeDistantVesselLight.AddValue("ti", tiDuration, 
-				"duration of the light for the ti (.), in seconds");
+			nodeDistantVesselLight.AddValue("dit", ditDuration, 
+				"duration of the light for the dit (.), in seconds");
 			
-			nodeDistantVesselLight.AddValue ("taah", taahDuration, 
-				"duration of the light for the taah (_), in seconds");
+			nodeDistantVesselLight.AddValue ("dah", dahDuration, 
+				"duration of the light for the dah (_), in seconds");
 			
 			nodeDistantVesselLight.AddValue ("symbol_space", symbolSpaceDuration, 
 				"duration of the darkness between two symbol, in seconds");
