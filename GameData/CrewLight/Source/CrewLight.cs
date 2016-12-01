@@ -34,11 +34,9 @@ namespace CrewLight
 
 			GameEvents.onCrewTransferred.Add (UpdateLight);
 			GameEvents.onVesselChange.Add (StartLight);
-//			GameEvents.onVesselSwitchingToUnloaded.Add ();
 			if (morseCodeIsEnabled) {
 				GameEvents.onVesselChange.Add (StopLightCoroutine);
 				GameEvents.onGameSceneLoadRequested.Add (OnGameSceneChange);
-//				GameEvents.onPhysicsEaseStop.Add (AddOnVesselGoOffRails);
 				GameEvents.onVesselGoOffRails.Add(OnVesselGoOffRails);
 			}
 			StartLight (FlightGlobals.ActiveVessel);
@@ -51,7 +49,6 @@ namespace CrewLight
 				StopLightCoroutine ();
 				GameEvents.onVesselChange.Remove (StopLightCoroutine);
 				GameEvents.onGameSceneLoadRequested.Remove (OnGameSceneChange);
-//				GameEvents.onPhysicsEaseStop.Remove (AddOnVesselGoOffRails);
 				GameEvents.onVesselGoOffRails.Remove (OnVesselGoOffRails);
 			}
 			GameEvents.onCrewTransferred.Remove (UpdateLight);
@@ -92,7 +89,7 @@ namespace CrewLight
 					if (anim.toggleName == "Toggle Lights" && anim.animState == false) {
 						anim.ToggleEvent ();
 						//						Debug.Log ("[Crew Light] : " + part.name + " is lighted by ModuleColorChanger");
-						return;
+//						return;
 					}
 				}
 			}
@@ -101,7 +98,7 @@ namespace CrewLight
 					if (anim.isOn == false) {
 						anim.LightsOn ();
 						//						Debug.Log ("[Crew Light] : " + part.name + " is lighted by ModuleLight");
-						return;
+//						return;
 					}
 				}
 			}
@@ -110,7 +107,7 @@ namespace CrewLight
 					if ((anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == true) {
 						anim.Toggle ();
 						//						Debug.Log ("[Crew Light] : " + part.name + " is lighted by ModuleAnimateGeneric");
-						return;
+//						return;
 					}
 				}
 			}
@@ -130,7 +127,7 @@ namespace CrewLight
 					foreach (ModuleColorChanger anim in part.Modules.GetModules<ModuleColorChanger>()) {
 						if (anim.toggleName == "Toggle Lights" && anim.animState == true) {
 							anim.ToggleEvent ();
-							return;
+//							return;
 						}
 					}
 				}
@@ -138,7 +135,7 @@ namespace CrewLight
 					foreach (ModuleLight anim in part.Modules.GetModules<ModuleLight>()) {
 						if (anim.isOn == true) {
 							anim.LightsOff ();
-							return;
+//							return;
 						}
 					}
 				}
@@ -146,7 +143,7 @@ namespace CrewLight
 					foreach (ModuleAnimateGeneric anim in part.Modules.GetModules<ModuleAnimateGeneric>()) {
 						if ((anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == false) {
 							anim.Toggle ();
-							return;
+//							return;
 						}
 					}
 				}
@@ -199,11 +196,6 @@ namespace CrewLight
 //			}
 //		}
 
-//		private void AddOnVesselGoOffRails (Vessel v)
-//		{
-//			GameEvents.onVesselGoOffRails.Add (OnVesselGoOffRails);
-//		}
-
 		private void OnGameSceneChange (GameScenes gameScene)
 		{
 			StopLightCoroutine ();
@@ -232,10 +224,7 @@ namespace CrewLight
 		void StopLightCoroutine (Vessel v = null)
 		{
 			StopCoroutine("DistantVesselLight");
-//			Debug.Log ("[Crew Light] Coroutine : Stop DistantVesselLight");
-
 			StopCoroutine ("BlinkLights");
-//			Debug.Log ("[Crew Light] Coroutine : Stop BlinkLight");
 
 			if (lightIsOn != null && lightModules != null) {
 				LightPreviousState ();
@@ -338,11 +327,10 @@ namespace CrewLight
 
 		IEnumerator BlinkLights ()
 		{
-//			Debug.Log ("[Crew Light] : Turning off all the lights on the distant vessel");
 			// Turning all the lights off before Morse blinking
 			AllLightsOff (lightModules);
 			yield return new WaitForSeconds (settings.ditDuration);
-//			Debug.Log ("[Crew Light] : Morse message");
+
 			// Morse message
 			foreach (int c in settings.morseCode) {
 				switch (c) {
@@ -373,10 +361,6 @@ namespace CrewLight
 
 		public void LightPreviousState ()
 		{
-//			Debug.Log("[Crew Light] : Set lights to theirs previous state");
-//			Debug.Log("[Crew Light] LightPreviousState : lightModules : " + lightModules.ToArray().ToString());
-//			Debug.Log("[Crew Light] LightPreviousState : lightIsOn : " + lightIsOn.ToArray().ToString());
-
 			// Settings lights to theirs previous state
 			int i = 0;
 			foreach (bool? isOn in lightIsOn) {
@@ -397,17 +381,7 @@ namespace CrewLight
 			}
 			lightIsOn = null;
 			lightModules = null;
-//			Debug.Log("[Crew Light] : Blinking is finish");
 		}
-
-//		IEnumerator RoutineLight () 
-//		{
-//			Vessel vessel = FlightGlobals.ActiveVessel;
-//			if (vessel.crewedParts != 0 && vessel.isEVA == false) {
-//				yield return new WaitForSeconds (.1f);
-//				StartLight (vessel);
-//			}
-//		}
 
 		private void AllLightsOff (List<PartModule> moduleLight)
 		{

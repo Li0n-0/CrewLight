@@ -97,7 +97,7 @@ namespace CrewLight
 				Create ();
 			}
 			ParseMorse ();
-			Debug.Log ("[Crew Light] Settings : settings.cfg node : " + settingsNode.ToString ());
+//			Debug.Log ("[Crew Light] Settings : settings.cfg node : " + settingsNode.ToString ());
 		}
 
 		private void Create ()

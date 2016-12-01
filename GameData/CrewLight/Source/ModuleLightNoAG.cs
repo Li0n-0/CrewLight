@@ -48,7 +48,7 @@ namespace CrewLight
 								foreach (BaseAction action in partM.Actions) {
 									if (action.actionGroup == KSPActionGroup.Light) {
 										action.actionGroup = KSPActionGroup.None;
-										return;
+										break;
 									}
 								}
 							}
