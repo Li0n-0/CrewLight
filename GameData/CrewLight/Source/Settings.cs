@@ -138,7 +138,7 @@ namespace CrewLight
 			nodeLightActionGroup.AddValue ("disable_auto_light_action_group", disableAutoAG, 
 				"Don't use Light action group for crewable part");
 
-			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/Settings.cfg");
+			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
 		}
 	}
 }

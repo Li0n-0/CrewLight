@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace CrewLight
@@ -86,7 +87,7 @@ namespace CrewLight
 			/* Send the event that turn on the light, different flavor for different PartModule */
 			if (part.Modules.Contains<ModuleColorChanger>()) {
 				foreach (ModuleColorChanger anim in part.Modules.GetModules<ModuleColorChanger>()) {
-					if (anim.toggleName == "Toggle Lights" && anim.animState == false) {
+					if (Regex.IsMatch(anim.toggleName, "light", RegexOptions.IgnoreCase) && anim.animState == false) {
 						anim.ToggleEvent ();
 						//						Debug.Log ("[Crew Light] : " + part.name + " is lighted by ModuleColorChanger");
 //						return;
@@ -104,7 +105,7 @@ namespace CrewLight
 			}
 			if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
 				foreach (ModuleAnimateGeneric anim in part.Modules.GetModules<ModuleAnimateGeneric>()) {
-					if ((anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == true) {
+					if (Regex.IsMatch(anim.actionGUIName, "light", RegexOptions.IgnoreCase) && anim.animSwitch == true){// anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == true) {
 						anim.Toggle ();
 						//						Debug.Log ("[Crew Light] : " + part.name + " is lighted by ModuleAnimateGeneric");
 //						return;
@@ -125,7 +126,7 @@ namespace CrewLight
 			if (part.protoModuleCrew.Count == 0) {
 				if (part.Modules.Contains<ModuleColorChanger>()) {
 					foreach (ModuleColorChanger anim in part.Modules.GetModules<ModuleColorChanger>()) {
-						if (anim.toggleName == "Toggle Lights" && anim.animState == true) {
+						if (Regex.IsMatch(anim.toggleName, "light", RegexOptions.IgnoreCase) && anim.animState == true) {
 							anim.ToggleEvent ();
 //							return;
 						}
@@ -141,7 +142,7 @@ namespace CrewLight
 				}
 				if (part.Modules.Contains<ModuleAnimateGeneric>()) {
 					foreach (ModuleAnimateGeneric anim in part.Modules.GetModules<ModuleAnimateGeneric>()) {
-						if ((anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == false) {
+						if (Regex.IsMatch(anim.actionGUIName, "light", RegexOptions.IgnoreCase) && anim.animSwitch == false){//(anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == false) {
 							anim.Toggle ();
 //							return;
 						}
