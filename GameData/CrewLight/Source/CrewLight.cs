@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+//using CommNet;
 
 namespace CrewLight
 {
@@ -25,6 +26,11 @@ namespace CrewLight
 		private List<bool?> lightIsOn;
 		private float timeFromVesselLoad;
 
+		private List<PartModule> activeVesselLightModules;
+//		private Vector3d sunPos;
+		private bool inDark = true;
+//		private CommNet.Occluders.OccluderHorizonCulling occluder;
+
 		public void Start () 
 		{
 			settings = new Settings ();
@@ -39,6 +45,16 @@ namespace CrewLight
 				GameEvents.onVesselGoOffRails.Add(OnVesselGoOffRails);
 			}
 			StartLight (FlightGlobals.ActiveVessel);
+
+//			sunPos = FlightGlobals.GetBodyByName ("Sun").position;
+//			occluder = new CommNet.Occluders.OccluderHorizonCulling ();
+			FindLightPart ();
+			StartCoroutine ("SunLight");
+
+			// Layers index :
+			for (int i = 0 ; i <= 100 ; i++) {
+				Debug.Log ("[Crew Light] Layers index : Layer n° " + i + " : " + LayerMask.LayerToName (i));
+			}
 		}
 
 		public void OnDestroy () 
@@ -51,6 +67,8 @@ namespace CrewLight
 			}
 			GameEvents.onCrewTransferred.Remove (UpdateLight);
 			GameEvents.onVesselChange.Remove (StartLight);
+
+			StopCoroutine ("SunLight");
 		}
 
 		private void StartLight (Vessel vessel) {
@@ -68,7 +86,6 @@ namespace CrewLight
 					}
 				}
 			}
-			Debug.Log ("[Crew Light] Start : Assigning timeFromVesselLoad, Time.time = " + Time.time);
 			timeFromVesselLoad = Time.time;
 		}
 
@@ -213,7 +230,7 @@ namespace CrewLight
 			}
 		}
 
-		void StopLightCoroutine (Vessel v = null)
+		private void StopLightCoroutine (Vessel v = null)
 		{
 			StopCoroutine("DistantVesselLight");
 			StopCoroutine ("BlinkLights");
@@ -339,7 +356,7 @@ namespace CrewLight
 			LightPreviousState ();
 		}
 
-		public void LightPreviousState ()
+		private void LightPreviousState ()
 		{
 			// Settings lights to theirs previous state
 			int i = 0;
@@ -408,6 +425,126 @@ namespace CrewLight
 					partM.SendMessage ("TurnOnLights");
 					break;
 				}
+			}
+		}
+
+		private void FindLightPart ()
+		{
+			activeVesselLightModules = new List<PartModule> ();
+			foreach (Part part in FlightGlobals.ActiveVessel.Parts) {
+				if (part.Modules.Contains<ModuleColorChanger> ()) {
+					ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();
+					if (Regex.IsMatch(partM.toggleName, "light", RegexOptions.IgnoreCase)) {
+						activeVesselLightModules.Add (partM);
+					}
+				}
+				if (part.Modules.Contains<ModuleLight> ()) {
+					foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
+						activeVesselLightModules.Add (partM);
+					}
+				}
+				if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
+					foreach (ModuleAnimateGeneric partM in part.Modules.GetModules<ModuleAnimateGeneric>()) {
+						if (Regex.IsMatch(partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
+							activeVesselLightModules.Add (partM);
+						}
+					}
+				}
+				if (part.Modules.Contains ("WBILight")) {
+					foreach (PartModule partM in part.Modules) {
+						if (partM.ClassName == "WBILight") {
+							activeVesselLightModules.Add (partM);
+						}
+					}
+				}
+			}
+		}
+
+		IEnumerator SunLight ()
+		{
+//			while (FlightGlobals.ActiveVessel.situation == Vessel.Situations.PRELAUNCH) {
+			Debug.Log("[Crew Light] SunLight : Begining of the coroutine");
+			yield return new WaitForSeconds (.1f);
+//			}
+
+
+			RaycastHit hit;
+			Vector3d vesselPos, sunPos;
+			int layerMask = (1 << 10); // Scaled Scenery layer
+
+			while (true) {
+				Debug.Log ("[Crew Light] SunLight : Position of the vessel : " + FlightGlobals.ActiveVessel.GetWorldPos3D ().ToString());
+				Debug.Log ("[Crew Light] SunLight : Position of the sun : " + FlightGlobals.GetBodyByName ("Sun").position);
+				vesselPos = FlightGlobals.ActiveVessel.transform.position;
+				sunPos = FlightGlobals.GetBodyByName ("Sun").position;
+				Debug.Log ("[Crew Light] SunLight : Start the infinite loop");
+				if (Physics.Raycast (vesselPos, sunPos, out hit, Mathf.Infinity, layerMask)) {
+					Debug.Log ("[Crew Light] SunLight : Raycast did hit something");
+					if (hit.transform != null) {
+						if (hit.transform.name == "Sun") {
+							Debug.Log ("[Crew Light] SunLight : hit.transform.name == Sun");
+							if (inDark) {
+								Debug.Log ("[Crew Light] SunLight : inDark == true");
+								Debug.Log ("[Crew Light] SunLight : Turn the lights off");
+								AllLightsOff (activeVesselLightModules);
+								inDark = false;
+							}
+						} else {
+							Debug.Log ("[Crew Light] SunLight : hit.transform.name != Sun");
+							if (inDark == false) {
+								Debug.Log ("[Crew Light] SunLight : inDark == false");
+								Debug.Log ("[Crew Light] SunLight : Turn the lights on");
+								AllLightsOn (activeVesselLightModules);
+								inDark = true;
+							}
+						}
+					}
+				}
+
+
+//				for (int i = 0 ; i < 31 ; i++) {
+//					Debug.Log ("[Crew Light] SunLight : Only : " + LayerMask.LayerToName(i));
+//					int layerMask = (1 << i);
+//					if (Physics.Raycast(FlightGlobals.ActiveVessel.GetWorldPos3D(), sunPos, out hit, Mathf.Infinity, layerMask)) {
+//						
+//						if (hit.transform != null) {
+//							Debug.Log ("[Crew Light] SunLight : hit transform name is : " + hit.transform.name);
+//							if (hit.transform.gameObject != null) {
+//								Debug.Log ("[Crew Light] SunLight : hit gameObject name is : " + hit.transform.gameObject.name);
+//								if (hit.transform.gameObject.GetComponent<Part>() != null) {
+//									Debug.Log ("[Crew Light] SunLight : hit contains a part : " + hit.transform.gameObject.GetComponent<Part>().name);
+//								}
+//							}
+//						}
+//						if (hit.rigidbody != null) {
+//							Debug.Log ("[Crew Light] SunLight : hit rigidbody name is : " + hit.rigidbody.name);
+//						}
+//
+//
+//					}
+//					yield return new WaitForSeconds (1f);
+				
+//				FlightGlobals.ActiveVessel.
+//				Debug.Log("[Crew Light] SunLight : Begining of the infinite loop");
+//				if (Physics.Raycast(FlightGlobals.ActiveVessel.GetWorldPos3D(), sunPos, Mathf.Infinity, 15)) {
+//					Debug.Log("[Crew Light] SunLight : Raycast hit something");
+//					if (inDark != true) {
+//						Debug.Log("[Crew Light] SunLight : Not already in dark mode");
+//						AllLightsOn (activeVesselLightModules);
+//						inDark = true;
+//						Debug.Log("[Crew Light] SunLight : Light should be On and dark mode is true");
+//					}
+//				} else {
+//					Debug.Log("[Crew Light] SunLight : Raycast don't hit anythings");
+//					if (inDark) {
+//						Debug.Log("[Crew Light] SunLight : Lights are On");
+//						AllLightsOff (activeVesselLightModules);
+//						inDark = false;
+//						Debug.Log("[Crew Light] SunLight : Lights should be Off and dark mode is false");
+//					}
+//				}
+//				Debug.Log("[Crew Light] SunLight : End of the loop, waiting two seconds");
+				yield return new WaitForSeconds (2f);
 			}
 		}
 	}
