@@ -9,18 +9,28 @@ namespace CrewLight
 		private ConfigNode settingsNode;
 		private ConfigNode nodeDistantVesselLight;
 		private ConfigNode nodeLightActionGroup;
+		private ConfigNode nodeSunLight;
 
 		// Default settings :
+
+		// Distant Lightning :
 		public bool useMorseCode = true;
 		public bool onlyForControllable = false;
-		public string morseCodeStr = "_._|...|.__.";
+		public string morseCodeStr = "__.|._..|.|_.|_.";
 		public double distance = 200d;
 		public float ditDuration = .9f;
 		public float dahDuration = 2f;
 		public float symbolSpaceDuration = 1f;
 		public float letterSpaceDuration = 1.3f;
 		public float wordSpaceDuration = 1.7f;
-		public bool disableAutoAG = true;
+
+		// Sun Light :
+		public bool useSunLight = true;
+		public bool onlyNoAGpart = true;
+
+		// Light Action Group :
+		public bool disableCrewAG = true;
+		public bool disableAllAG = false;
 
 		public List<int> morseCode;
 
@@ -55,6 +65,9 @@ namespace CrewLight
 			if (settingsNode.HasNode("Distant_Vessel_Morse_Code")) {
 				nodeDistantVesselLight = settingsNode.GetNode ("Distant_Vessel_Morse_Code");
 			} else { return false; }
+			if (settingsNode.HasNode("Sun_Light")) {
+				nodeSunLight = settingsNode.GetNode ("Sun_Light");
+			} else { return false; }
 			if (settingsNode.HasNode("Light_Action_Group")) {
 				nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
 			} else { return false; }
@@ -70,10 +83,19 @@ namespace CrewLight
 				"letter_space",
 				"word_space"
 			};
-			string[] paramLightAGValue = new string[] {
-				"disable_auto_light_action_group"
+			string[] paramSunLightValue = new string[] {
+				"use_sun_light",
+				"only_light_not_in_AG"
 			};
-			if (nodeDistantVesselLight.HasValues (paramMorseValue) && nodeLightActionGroup.HasValues (paramLightAGValue)) {
+			string[] paramLightAGValue = new string[] {
+				"disable_light_action_group_for_crew_part",
+				"disable_action_group_for_light_part"
+			};
+
+			if (nodeDistantVesselLight.HasValues (paramMorseValue) 
+				&& nodeSunLight.HasValues(paramSunLightValue)
+				&& nodeLightActionGroup.HasValues (paramLightAGValue))
+			{
 				useMorseCode = bool.Parse (nodeDistantVesselLight.GetValue ("use_morse_code"));
 				onlyForControllable = bool.Parse (nodeDistantVesselLight.GetValue("only_for_controllable_vessel"));
 				morseCodeStr = nodeDistantVesselLight.GetValue ("morse_code");
@@ -83,7 +105,12 @@ namespace CrewLight
 				symbolSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("symbol_space"));
 				letterSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("letter_space"));
 				wordSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("word_space"));
-				disableAutoAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_auto_light_action_group"));
+
+				useSunLight = bool.Parse (nodeSunLight.GetValue ("use_sun_light"));
+				onlyNoAGpart = bool.Parse (nodeSunLight.GetValue ("only_light_not_in_AG"));
+
+				disableCrewAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_light_action_group_for_crew_part"));
+				disableAllAG = bool.Parse (nodeLightActionGroup.GetValue("disable_action_group_for_light_part"));
 			} else { return false; }
 
 			return true;
@@ -97,7 +124,6 @@ namespace CrewLight
 				Create ();
 			}
 			ParseMorse ();
-			Debug.Log ("[Crew Light] Settings : settings.cfg node : " + settingsNode.ToString ());
 		}
 
 		private void Create ()
@@ -105,9 +131,11 @@ namespace CrewLight
 			settingsNode = new ConfigNode ();
 
 			settingsNode.AddNode ("Distant_Vessel_Morse_Code");
+			settingsNode.AddNode ("Sun_Light");
 			settingsNode.AddNode ("Light_Action_Group");
 
 			ConfigNode nodeDistantVesselLight = settingsNode.GetNode ("Distant_Vessel_Morse_Code");
+			ConfigNode nodeSunLight = settingsNode.GetNode ("Sun_Light");
 			ConfigNode nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
 
 			nodeDistantVesselLight.AddValue ("use_morse_code", useMorseCode);
@@ -135,10 +163,19 @@ namespace CrewLight
 			nodeDistantVesselLight.AddValue ("word_space", wordSpaceDuration, 
 				"duration of the darkness between two words, ' ', in seconds");
 
-			nodeLightActionGroup.AddValue ("disable_auto_light_action_group", disableAutoAG, 
-				"Don't use Light action group for crewable part");
+			nodeSunLight.AddValue("use_sun_light", useSunLight, 
+				"lights will go on/off as the sun rise/fall");
 
-			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/Settings.cfg");
+			nodeSunLight.AddValue ("only_light_not_in_AG", onlyNoAGpart,
+				"only lights not assigned to an Action Group will be lighted when the sun fall");
+
+			nodeLightActionGroup.AddValue ("disable_light_action_group_for_crew_part", disableCrewAG, 
+				"remove crewable part from the Light Action Group");
+
+			nodeLightActionGroup.AddValue ("disable_action_group_for_light_part", disableAllAG, 
+				"remove all the light part from the Light Action Group");
+
+			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
 		}
 	}
 }

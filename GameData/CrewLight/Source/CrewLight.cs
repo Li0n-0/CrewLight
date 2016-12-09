@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace CrewLight
@@ -8,236 +9,188 @@ namespace CrewLight
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
 	public class CrewLight : MonoBehaviour
 	{
-		/*
-		 *
-		 *	This little plugin does two things : when a vessel is selected, all the part containing a Kerbal
-		 *	are lightnend.
-		 *	Second : when a Kerbal change seat, either by a transfer or boarding the corresponding part is 
-		 *	lightned.
-		 * 
-		 */
-
 		private Settings settings;
-		private bool morseCodeIsEnabled;
-//		private bool isStart;
 
-		private List<PartModule> lightModules;
-		private List<bool?> lightIsOn;
-		private float timeFromVesselLoad;
+		private int maxSearch = 200;
 
 		public void Start () 
 		{
 			settings = new Settings ();
 			settings.Load ();
-			morseCodeIsEnabled = settings.useMorseCode;
-//			isStart = true;
 
+			// Crew Light function :
 			GameEvents.onCrewTransferred.Add (UpdateLight);
 			GameEvents.onVesselChange.Add (StartLight);
-//			GameEvents.onVesselSwitchingToUnloaded.Add ();
-			if (morseCodeIsEnabled) {
-				GameEvents.onVesselChange.Add (StopLightCoroutine);
+			StartLight (FlightGlobals.ActiveVessel);
+
+			// Distant Light function :
+			if (settings.useMorseCode) {
+				GameEvents.onTimeWarpRateChanged.Add (OnTimeWarpChanged);
+				GameEvents.onVesselChange.Add (StopDistantLightCoroutine);
 				GameEvents.onGameSceneLoadRequested.Add (OnGameSceneChange);
-//				GameEvents.onPhysicsEaseStop.Add (AddOnVesselGoOffRails);
 				GameEvents.onVesselGoOffRails.Add(OnVesselGoOffRails);
 			}
-			StartLight (FlightGlobals.ActiveVessel);
-//			StartCoroutine (RoutineLight());
+
+			// Sun Light function :
+			if (settings.useSunLight) {
+				GameEvents.onVesselChange.Add (OnVesselChange);
+				GameEvents.onVesselPartCountChanged.Add (OnVesselChange);
+				StartCoroutine ("TrackSun", FlightGlobals.ActiveVessel);
+			}
 		}
 
 		public void OnDestroy () 
 		{
-			if (morseCodeIsEnabled) {
-				StopLightCoroutine ();
-				GameEvents.onVesselChange.Remove (StopLightCoroutine);
-				GameEvents.onGameSceneLoadRequested.Remove (OnGameSceneChange);
-//				GameEvents.onPhysicsEaseStop.Remove (AddOnVesselGoOffRails);
-				GameEvents.onVesselGoOffRails.Remove (OnVesselGoOffRails);
-			}
+			// Crew Light function :
 			GameEvents.onCrewTransferred.Remove (UpdateLight);
 			GameEvents.onVesselChange.Remove (StartLight);
+
+			// Distant Light function :
+			if (settings.useMorseCode) {
+				StopDistantLightCoroutine ();
+				GameEvents.onTimeWarpRateChanged.Remove (OnTimeWarpChanged);
+				GameEvents.onVesselChange.Remove (StopDistantLightCoroutine);
+				GameEvents.onGameSceneLoadRequested.Remove (OnGameSceneChange);
+				GameEvents.onVesselGoOffRails.Remove (OnVesselGoOffRails);
+			}
+
+			// Sun Light function :
+			if (settings.useSunLight) {
+				GameEvents.onVesselChange.Remove (OnVesselChange);
+				GameEvents.onVesselPartCountChanged.Remove (OnVesselChange);
+				StopCoroutine ("TrackSun");
+			}
 		}
 
+		#region CrewLight
+
+		private float timeFromVesselLoad;
+
 		private void StartLight (Vessel vessel) {
-			/* Set the lights for a whole vessel */
+			/* Set the lights in crewable parts regarding to theirs occupation */
 			StartCoroutine("LightCrewCab", vessel);
+			timeFromVesselLoad = Time.time;
 		}
 
 		private IEnumerator LightCrewCab (Vessel vessel)
 		{
+			yield return new WaitForSeconds (.1f);
 			if (vessel.crewedParts != 0 && vessel.isEVA == false) {
-				yield return new WaitForSeconds (.1f);
 				foreach (ProtoCrewMember crewMember in vessel.GetVesselCrew()){
 					if (crewMember.KerbalRef != null) {// If this is false it should means the Kerbal is in a Command Seat
-						Light (crewMember.KerbalRef.InPart);
+						SwitchLight.On (crewMember.KerbalRef.InPart);
 					}
 				}
 			}
-			Debug.Log ("[Crew Light] Start : Assigning timeFromVesselLoad, Time.time = " + Time.time);
-			timeFromVesselLoad = Time.time;
 		}
 
 		private void UpdateLight (GameEvents.HostedFromToAction<ProtoCrewMember, Part> eData) 
 		{
 			/* Update the status of the lights when a Kerbal moves */
-			Light (eData.to);
-			LightOff (eData.from);
+			SwitchLight.On (eData.to);
+			SwitchLight.Off (eData.from);
 		}
 
-		private void Light (Part part)
+		#endregion
+
+		#region DistantLight
+
+		private List<PartModule> distantVesselLightModule;
+		private List<bool?> distantVesselLightState;
+
+		private IEnumerator FindLightOnDistantVessel (Vessel vessel)
 		{
-			/* Send the event that turn on the light, different flavor for different PartModule */
-			if (part.Modules.Contains<ModuleColorChanger>()) {
-				foreach (ModuleColorChanger anim in part.Modules.GetModules<ModuleColorChanger>()) {
-					if (anim.toggleName == "Toggle Lights" && anim.animState == false) {
-						anim.ToggleEvent ();
-						//						Debug.Log ("[Crew Light] : " + part.name + " is lighted by ModuleColorChanger");
-						return;
-					}
-				}
-			}
-			if (part.Modules.Contains<ModuleLight>()) { // For the Karibou rover, and maybe others...
-				foreach (ModuleLight anim in part.Modules.GetModules<ModuleLight>()) {
-					if (anim.isOn == false) {
-						anim.LightsOn ();
-						//						Debug.Log ("[Crew Light] : " + part.name + " is lighted by ModuleLight");
-						return;
-					}
-				}
-			}
-			if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
-				foreach (ModuleAnimateGeneric anim in part.Modules.GetModules<ModuleAnimateGeneric>()) {
-					if ((anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == true) {
-						anim.Toggle ();
-						//						Debug.Log ("[Crew Light] : " + part.name + " is lighted by ModuleAnimateGeneric");
-						return;
-					}
-				}
-			}
-			if (part.Modules.Contains("WBILight")) {
-				foreach (PartModule partM in part.Modules) {
-					if (partM.ClassName == "WBILight") {
-						partM.SendMessage ("TurnOnLights");
+			distantVesselLightModule = new List<PartModule>();
+			distantVesselLightState = new List<bool?>();
 
-					}
-				}
-			}
-		}
+			int iSearch = 0;
 
-		private void LightOff (Part part) {
-			if (part.protoModuleCrew.Count == 0) {
-				if (part.Modules.Contains<ModuleColorChanger>()) {
-					foreach (ModuleColorChanger anim in part.Modules.GetModules<ModuleColorChanger>()) {
-						if (anim.toggleName == "Toggle Lights" && anim.animState == true) {
-							anim.ToggleEvent ();
-							return;
+			yield return new WaitForSeconds (.1f);
+
+			foreach (Part part in vessel.Parts) {
+				if (iSearch >= maxSearch) {
+					yield return new WaitForSeconds (.1f);
+					iSearch = 0;
+				}
+
+				// Check for lightable modules
+				if (part.Modules.Contains<ModuleColorChanger> ()) {
+					ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();
+					if (Regex.IsMatch(partM.toggleName, "light", RegexOptions.IgnoreCase)) {
+						distantVesselLightModule.Add (partM);
+						if (partM.animState) {
+							distantVesselLightState.Add (true);
+						} else {
+							distantVesselLightState.Add (false);
 						}
 					}
 				}
-				if (part.Modules.Contains<ModuleLight>()) {
-					foreach (ModuleLight anim in part.Modules.GetModules<ModuleLight>()) {
-						if (anim.isOn == true) {
-							anim.LightsOff ();
-							return;
+				if (part.Modules.Contains<ModuleLight> ()) {
+					foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
+						distantVesselLightModule.Add (partM);
+						if (partM.isOn) {
+							distantVesselLightState.Add (true);
+						} else {
+							distantVesselLightState.Add (false);
 						}
 					}
 				}
-				if (part.Modules.Contains<ModuleAnimateGeneric>()) {
-					foreach (ModuleAnimateGeneric anim in part.Modules.GetModules<ModuleAnimateGeneric>()) {
-						if ((anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") && anim.animSwitch == false) {
-							anim.Toggle ();
-							return;
+				if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
+					foreach (ModuleAnimateGeneric partM in part.Modules.GetModules<ModuleAnimateGeneric>()) {
+						if (Regex.IsMatch(partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
+							distantVesselLightModule.Add (partM);
+							if (partM.animSwitch == false) {
+								distantVesselLightState.Add (true);
+							} else {
+								distantVesselLightState.Add (false);
+							}
 						}
 					}
 				}
-				if (part.Modules.Contains("WBILight")) {
+				if (part.Modules.Contains ("WBILight")) {
 					foreach (PartModule partM in part.Modules) {
 						if (partM.ClassName == "WBILight") {
-							partM.SendMessage ("TurnOffLights");
+							distantVesselLightModule.Add (partM);
+							distantVesselLightState.Add (null);
 						}
 					}
 				}
+				iSearch++;
 			}
 		}
-
-//		private void LightToggle (Part part) {
-//			if (part.protoModuleCrew.Count == 0) {
-//				if (part.Modules.Contains<ModuleColorChanger>()) {
-//					foreach (ModuleColorChanger anim in part.Modules.GetModules<ModuleColorChanger>()) {
-//						if (anim.toggleName == "Toggle Lights") {
-//							anim.ToggleEvent ();
-//							return;
-//						}
-//					}
-//				}
-//				if (part.Modules.Contains<ModuleLight>()) {
-//					foreach (ModuleLight anim in part.Modules.GetModules<ModuleLight>()) {
-//						if (anim.isOn == true) {
-//							anim.LightsOff ();
-//							return;
-//						} else {
-//							anim.LightsOn ();
-//							return;
-//						}
-//					}
-//				}
-//				if (part.Modules.Contains<ModuleAnimateGeneric>()) {
-//					foreach (ModuleAnimateGeneric anim in part.Modules.GetModules<ModuleAnimateGeneric>()) {
-//						if (anim.actionGUIName == "Toggle Lights" || anim.startEventGUIName == "Lights On") {
-//							anim.Toggle ();
-//							return;
-//						}
-//					}
-//				}
-//				if (part.Modules.Contains("WBILight")) {
-//					foreach (PartModule partM in part.Modules) {
-//						if (partM.ClassName == "WBILight") {
-//							partM.SendMessage ("ToggleAnimation");
-//						}
-//					}
-//				}
-//			}
-//		}
-
-//		private void AddOnVesselGoOffRails (Vessel v)
-//		{
-//			GameEvents.onVesselGoOffRails.Add (OnVesselGoOffRails);
-//		}
+			
+		private void OnTimeWarpChanged ()
+		{
+			timeFromVesselLoad = Time.time;
+		}
 
 		private void OnGameSceneChange (GameScenes gameScene)
 		{
-			StopLightCoroutine ();
+			// Dummy method because both events OnGameSceneChangeRequested and OnVesselChange return different
+			// type. A better workaroud would be to write a custom events that trigger when one of the previous 
+			// event do.
+			StopDistantLightCoroutine ();
 		}
 
 		private void OnVesselGoOffRails (Vessel vessel)
 		{
-//			Debug.Log ("[Crew Light] OnVesselGoOffRails : Vessel spotted : " + vessel.vesselName);
-//
-//			Debug.Log ("[Crew Light] OnVesselGoOffRails : timeFromVesselLoad = " + timeFromVesselLoad);
-//			Debug.Log ("[Crew Light] OnVesselGoOffRails : Time.time = " + Time.time);
-//			Debug.Log ("[Crew Light] OnVesselGoOffRails : Evaluate : timeFromVesselLoad + 2.5 <= Time.time");
+			// Check time elapsed since active vessel has loaded so it don't light already nearby vessel
 			if (timeFromVesselLoad + 2.5f <= Time.time && vessel != FlightGlobals.ActiveVessel) {
 				if (settings.onlyForControllable) {
 					if (vessel.IsControllable) {
 						StartCoroutine ("DistantVesselLight", vessel);
-//						Debug.Log ("[Crew Light] Coroutine : Start DistantVesselLight");
 					}
 				} else {
 					StartCoroutine ("DistantVesselLight", vessel);
-//					Debug.Log ("[Crew Light] Coroutine : Start DistantVesselLight");
 				}
 			}
 		}
 
-		void StopLightCoroutine (Vessel v = null)
+		private void StopDistantLightCoroutine (Vessel vessel = null)
 		{
 			StopCoroutine("DistantVesselLight");
-//			Debug.Log ("[Crew Light] Coroutine : Stop DistantVesselLight");
 
-			StopCoroutine ("BlinkLights");
-//			Debug.Log ("[Crew Light] Coroutine : Stop BlinkLight");
-
-			if (lightIsOn != null && lightModules != null) {
+			if (distantVesselLightState != null && distantVesselLightModule != null) {
 				LightPreviousState ();
 			}
 		}
@@ -245,7 +198,7 @@ namespace CrewLight
 		IEnumerator DistantVesselLight (Vessel vessel)
 		{
 			/*
-			 * Populate two lists : one for all the lightable part
+			 * Create two lists : one for all the lightable part
 			 * the second for their state
 			 * 
 			 * Blink the lights according to the morse message define in the setting
@@ -253,117 +206,42 @@ namespace CrewLight
 			 * Restore the lights to their previous state
 			 */
 
-			yield return new WaitForSeconds (.1f);// I had one crash once when searching for parts during the physic loading
+			// Create list
+			yield return StartCoroutine ("FindLightOnDistantVessel", vessel);
 
-			lightModules = new List<PartModule> ();
-			lightIsOn = new List<bool?> ();
-
-			int iSearch = 0;// Max parts being search per tick
-//			Debug.Log ("[Crew Light] : Starting populate list of part module for the distant vessel");
-			foreach (Part part in vessel.Parts) {
-				
-				if (iSearch == 200) {
-					iSearch = 0;
-					yield return new WaitForSeconds (.1f);
-				}
-
-				if (part.Modules.Contains<ModuleColorChanger> ()) {
-					ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();
-					if (partM.toggleName == "Toggle Lights") {
-						lightModules.Add (partM);
-						if (partM.animState) {
-							lightIsOn.Add (true);
-						} else {
-							lightIsOn.Add (false);
-						}
-					}
-				}
-				if (part.Modules.Contains<ModuleLight> ()) {
-					foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
-						lightModules.Add (partM);
-						if (partM.isOn) {
-							lightIsOn.Add (true);
-						} else {
-							lightIsOn.Add (false);
-						}
-					}
-				}
-				if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
-					foreach (ModuleAnimateGeneric partM in part.Modules.GetModules<ModuleAnimateGeneric>()) {
-						if (partM.actionGUIName == "Toggle Lights" || partM.startEventGUIName == "Lights On") {
-							lightModules.Add (partM);
-							if (partM.animSwitch == false) {
-								lightIsOn.Add (true);
-							} else {
-								lightIsOn.Add (false);
-							}
-							break;
-						}
-					}
-				}
-				if (part.Modules.Contains ("WBILight")) {
-					foreach (PartModule partM in part.Modules) {
-						if (partM.ClassName == "WBILight") {
-							lightModules.Add (partM);
-							lightIsOn.Add (null);
-							break;
-						}
-					}
-				}
-
-				iSearch++;
-			}
-//			Debug.Log ("[Crew Light] : List is populated");
-//
-//			Debug.Log ("[Crew Light] : distance = " + settings.distance + " and its type is : " + settings.distance.GetType ().ToString ());
-//			Debug.Log ("[Crew Light] : ti = " + settings.tiDuration + " and its type is : " + settings.tiDuration.GetType ().ToString ());
-//			Debug.Log ("[Crew Light] : taah = " + settings.taahDuration + " and its type is : " + settings.taahDuration.GetType ().ToString ());
-//
-//			Debug.Log ("[Crew Light] : Checking the distant between the two vessel");
 			// Checking the distance between the active and the encountered ship
 			if (settings.distance < 200d) {
-//				Debug.Log ("[Crew Light] : Distance in the settings is less than 200m");
-//				Debug.Log ("[Crew Light] : Distance at this point is : " + Vector3d.Distance (FlightGlobals.ship_orbit.pos, vessel.orbit.pos));
 				double vesselDistance = 1000d;
 				while (vesselDistance > settings.distance) {
 					yield return new WaitForSeconds (.5f);
 					vesselDistance = Vector3d.Distance (FlightGlobals.ship_orbit.pos, vessel.orbit.pos);
 				}
-			} else {
-//				Debug.Log ("[Crew Light] : Distance in the settings is less than 200m");
 			}
-//			Debug.Log ("[Crew Light] Coroutine : Start BlinkLight");
-			StartCoroutine("BlinkLights");
-		}
 
-		IEnumerator BlinkLights ()
-		{
-//			Debug.Log ("[Crew Light] : Turning off all the lights on the distant vessel");
-			// Turning all the lights off before Morse blinking
-			AllLightsOff (lightModules);
+			SwitchLight.AllLightsOff (distantVesselLightModule);
 			yield return new WaitForSeconds (settings.ditDuration);
-//			Debug.Log ("[Crew Light] : Morse message");
+
 			// Morse message
 			foreach (int c in settings.morseCode) {
 				switch (c) {
 				case 0:
-					AllLightsOn (lightModules);
+					SwitchLight.AllLightsOn (distantVesselLightModule);
 					yield return new WaitForSeconds (settings.ditDuration);
 					break;
 				case 1:
-					AllLightsOn (lightModules);
+					SwitchLight.AllLightsOn (distantVesselLightModule);
 					yield return new WaitForSeconds (settings.dahDuration);
 					break;
 				case 2:
-					AllLightsOff (lightModules);
+					SwitchLight.AllLightsOff (distantVesselLightModule);
 					yield return new WaitForSeconds (settings.letterSpaceDuration);
 					break;
 				case 3:
-					AllLightsOff (lightModules);
+					SwitchLight.AllLightsOff (distantVesselLightModule);
 					yield return new WaitForSeconds (settings.wordSpaceDuration);
 					break;
 				case 4:
-					AllLightsOff (lightModules);
+					SwitchLight.AllLightsOff (distantVesselLightModule);
 					yield return new WaitForSeconds (settings.symbolSpaceDuration);
 					break;
 				}
@@ -371,91 +249,148 @@ namespace CrewLight
 			LightPreviousState ();
 		}
 
-		public void LightPreviousState ()
+		private void LightPreviousState ()
 		{
-//			Debug.Log("[Crew Light] : Set lights to theirs previous state");
-//			Debug.Log("[Crew Light] LightPreviousState : lightModules : " + lightModules.ToArray().ToString());
-//			Debug.Log("[Crew Light] LightPreviousState : lightIsOn : " + lightIsOn.ToArray().ToString());
-
 			// Settings lights to theirs previous state
 			int i = 0;
-			foreach (bool? isOn in lightIsOn) {
+			foreach (bool? isOn in distantVesselLightState) {
 				if (isOn == null) {
-					if (lightModules[i].part.CrewCapacity > 0) {
-						if (lightModules[i].part.protoModuleCrew.Count > 0) {
-							Light (lightModules[i].part);
+					if (distantVesselLightModule[i].part.CrewCapacity > 0) {
+						if (distantVesselLightModule[i].part.protoModuleCrew.Count > 0) {
+							SwitchLight.On (distantVesselLightModule[i].part);
 						} else {
-							LightOff (lightModules [i].part);
+							SwitchLight.Off (distantVesselLightModule [i].part);
 						}
 					}
 				} else if (isOn == true) {
-					Light (lightModules [i].part);
+					SwitchLight.On (distantVesselLightModule [i].part);
 				} else {
-					LightOff (lightModules [i].part);
+					SwitchLight.Off (distantVesselLightModule [i].part);
 				}
 				i++;
 			}
-			lightIsOn = null;
-			lightModules = null;
-//			Debug.Log("[Crew Light] : Blinking is finish");
+			distantVesselLightState = null;
+			distantVesselLightModule = null;
 		}
 
-//		IEnumerator RoutineLight () 
-//		{
-//			Vessel vessel = FlightGlobals.ActiveVessel;
-//			if (vessel.crewedParts != 0 && vessel.isEVA == false) {
-//				yield return new WaitForSeconds (.1f);
-//				StartLight (vessel);
-//			}
-//		}
+		#endregion
 
-		private void AllLightsOff (List<PartModule> moduleLight)
+		#region SunLight
+
+		private List<PartModule> activeVesselLightModule;
+
+		private Vector3d vesselPos, sunPos;
+		private RaycastHit hit;
+
+		private int layerMask = (1 << 10); // Scaled Scenery layer
+		private bool inDark = false;
+		private float waitBetweenRay = 1.5f;
+
+		private IEnumerator FindLightOnActiveVessel (Vessel vessel)
 		{
-			foreach (PartModule partM in moduleLight) {
-				switch (partM.ClassName) {
-				case "ModuleColorChanger":
-					if (partM.GetComponent<ModuleColorChanger> ().animState) {
-						partM.GetComponent<ModuleColorChanger> ().ToggleEvent ();
-					}
-					break;
-				case "ModuleLight":
-					partM.GetComponent<ModuleLight> ().LightsOff ();
-					break;
-				case "ModuleAnimateGeneric":
-					if (partM.GetComponent<ModuleAnimateGeneric> ().animSwitch == false) {
-						partM.GetComponent<ModuleAnimateGeneric> ().Toggle ();
-					}
-					break;
-				case "WBILight":
-					partM.SendMessage ("TurnOffLights");
-					break;
+			activeVesselLightModule = new List<PartModule>();
+
+			int iSearch = 0;
+
+			yield return new WaitForSeconds (.1f);
+
+			foreach (Part part in vessel.Parts) {
+				if (iSearch >= maxSearch) {
+					yield return new WaitForSeconds (.1f);
+					iSearch = 0;
 				}
+
+				// Check if part is uncrewed
+				if (part.CrewCapacity == 0) {
+
+					if (part.Modules.Contains<ModuleColorChanger> ()) {
+						ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();
+						if (Regex.IsMatch(partM.toggleName, "light", RegexOptions.IgnoreCase)) {
+							if (settings.onlyNoAGpart) {
+								if (!partM.Actions.Contains(KSPActionGroup.Light)) {
+									activeVesselLightModule.Add (partM);
+								}
+							} else {
+								activeVesselLightModule.Add (partM);
+							}
+						}
+					}
+					if (part.Modules.Contains<ModuleLight> ()) {
+						foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
+							if (settings.onlyNoAGpart) {
+								if (!partM.Actions.Contains(KSPActionGroup.Light)) {
+									activeVesselLightModule.Add (partM);
+								}
+							} else {
+								activeVesselLightModule.Add (partM);
+							}
+						}
+					}
+					if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
+						foreach (ModuleAnimateGeneric partM in part.Modules.GetModules<ModuleAnimateGeneric>()) {
+							if (Regex.IsMatch(partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
+								if (settings.onlyNoAGpart) {
+									if (!partM.Actions.Contains(KSPActionGroup.Light)) {
+										activeVesselLightModule.Add (partM);
+									}
+								} else {
+									activeVesselLightModule.Add (partM);
+								}
+							}
+						}
+					}
+					if (part.Modules.Contains ("WBILight")) {
+						foreach (PartModule partM in part.Modules) {
+							if (partM.ClassName == "WBILight") {
+								if (settings.onlyNoAGpart) {
+									if (!partM.Actions.Contains(KSPActionGroup.Light)) {
+										activeVesselLightModule.Add (partM);
+									}
+								} else {
+									activeVesselLightModule.Add (partM);
+								}
+							}
+						}
+					}
+				}
+				iSearch++;
 			}
 		}
 
-		private void AllLightsOn (List<PartModule> moduleLight)
+		private void OnVesselChange (Vessel vessel) {
+			StopCoroutine ("TrackSun");
+			StartCoroutine ("TrackSun", vessel);
+		}
+
+		private IEnumerator TrackSun (Vessel vessel)
 		{
-			foreach (PartModule partM in moduleLight) {
-				switch (partM.ClassName) {
-				case "ModuleColorChanger":
-					if (partM.GetComponent<ModuleColorChanger> ().animState == false) {
-						partM.GetComponent<ModuleColorChanger> ().ToggleEvent ();
+			yield return StartCoroutine ("FindLightOnActiveVessel", vessel);
+
+			while (true) {
+				// Get position of the sun and the vessel
+				vesselPos = FlightGlobals.ActiveVessel.transform.position;
+				sunPos = FlightGlobals.GetBodyByName ("Sun").position;
+
+				if (Physics.Raycast (vesselPos, sunPos, out hit, Mathf.Infinity, layerMask)) {
+					if (hit.transform != null) {
+//						Debug.Log ("[Crew Light] SunLight : hit is " + hit.transform.name);
+						if (hit.transform.name == "Sun") {
+							if (inDark) {
+								SwitchLight.AllLightsOff (activeVesselLightModule);
+								inDark = false;
+							}
+						} else {
+							if (inDark == false) {
+								SwitchLight.AllLightsOn (activeVesselLightModule);
+								inDark = true;
+							}
+						}
 					}
-					break;
-				case "ModuleLight":
-					partM.GetComponent<ModuleLight> ().LightsOn ();
-					break;
-				case "ModuleAnimateGeneric":
-					if (partM.GetComponent<ModuleAnimateGeneric> ().animSwitch) {
-						partM.GetComponent<ModuleAnimateGeneric> ().Toggle ();
-					}
-					break;
-				case "WBILight":
-					partM.SendMessage ("TurnOnLights");
-					break;
 				}
+				yield return new WaitForSeconds (waitBetweenRay);
 			}
 		}
+
+		#endregion
 	}
 }
-
