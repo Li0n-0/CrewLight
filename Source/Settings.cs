@@ -27,6 +27,8 @@ namespace CrewLight
 		// Sun Light :
 		public bool useSunLight = true;
 		public bool onlyNoAGpart = true;
+		public bool useDepthLight = true;
+		public double depthThreshold = 20d;
 
 		// Light Action Group :
 		public bool disableCrewAG = true;
@@ -85,6 +87,8 @@ namespace CrewLight
 			};
 			string[] paramSunLightValue = new string[] {
 				"use_sun_light",
+				"use_depth_light",
+				"depth_threshold",
 				"only_light_not_in_AG"
 			};
 			string[] paramLightAGValue = new string[] {
@@ -107,6 +111,8 @@ namespace CrewLight
 				wordSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("word_space"));
 
 				useSunLight = bool.Parse (nodeSunLight.GetValue ("use_sun_light"));
+				useDepthLight = bool.Parse (nodeSunLight.GetValue ("use_depth_light"));
+				depthThreshold = Double.Parse (nodeSunLight.GetValue ("depth_threshold"));
 				onlyNoAGpart = bool.Parse (nodeSunLight.GetValue ("only_light_not_in_AG"));
 
 				disableCrewAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_light_action_group_for_crew_part"));
@@ -138,6 +144,7 @@ namespace CrewLight
 			ConfigNode nodeSunLight = settingsNode.GetNode ("Sun_Light");
 			ConfigNode nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
 
+			// Distant Vessel :
 			nodeDistantVesselLight.AddValue ("use_morse_code", useMorseCode);
 
 			nodeDistantVesselLight.AddValue ("only_for_controllable_vessel", onlyForControllable);
@@ -163,12 +170,19 @@ namespace CrewLight
 			nodeDistantVesselLight.AddValue ("word_space", wordSpaceDuration, 
 				"duration of the darkness between two words, ' ', in seconds");
 
+			// Sun Light :
 			nodeSunLight.AddValue("use_sun_light", useSunLight, 
 				"lights will go on/off as the sun rise/fall");
+
+			nodeSunLight.AddValue ("use_depth_light", useDepthLight,
+				"lights will go on/off when the craft reach a certain depth");
+
+			nodeSunLight.AddValue ("depth_threshold", depthThreshold);
 
 			nodeSunLight.AddValue ("only_light_not_in_AG", onlyNoAGpart,
 				"only lights not assigned to an Action Group will be lighted when the sun fall");
 
+			// Editor Light :
 			nodeLightActionGroup.AddValue ("disable_light_action_group_for_crew_part", disableCrewAG, 
 				"remove crewable part from the Light Action Group");
 
