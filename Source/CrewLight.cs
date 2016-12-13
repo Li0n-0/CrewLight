@@ -33,9 +33,9 @@ namespace CrewLight
 
 			// Sun Light function :
 			if (settings.useSunLight) {
-				GameEvents.onVesselChange.Add (OnVesselChange);
-				GameEvents.onVesselPartCountChanged.Add (OnVesselChange);
-				StartCoroutine ("TrackSun", FlightGlobals.ActiveVessel);
+				GameEvents.onVesselSwitchingToUnloaded.Add (ClearSunLight);
+				GameEvents.onVesselPartCountChanged.Add (VesselChange);
+				StartCoroutine ("TrackSun");
 			}
 		}
 
@@ -56,8 +56,8 @@ namespace CrewLight
 
 			// Sun Light function :
 			if (settings.useSunLight) {
-				GameEvents.onVesselChange.Remove (OnVesselChange);
-				GameEvents.onVesselPartCountChanged.Remove (OnVesselChange);
+				GameEvents.onVesselSwitchingToUnloaded.Remove (ClearSunLight);
+				GameEvents.onVesselPartCountChanged.Remove (VesselChange);
 				StopCoroutine ("TrackSun");
 			}
 		}
@@ -252,43 +252,51 @@ namespace CrewLight
 		private void LightPreviousState ()
 		{
 			// Settings lights to theirs previous state
-			int i = 0;
-			foreach (bool? isOn in distantVesselLightState) {
-				if (isOn == null) {
-					if (distantVesselLightModule[i].part.CrewCapacity > 0) {
-						if (distantVesselLightModule[i].part.protoModuleCrew.Count > 0) {
-							SwitchLight.On (distantVesselLightModule[i].part);
-						} else {
-							SwitchLight.Off (distantVesselLightModule [i].part);
+
+			if (distantVesselLightState != null && distantVesselLightModule != null) {
+				int i = 0;
+				foreach (bool? isOn in distantVesselLightState) {
+					if (isOn == null) {
+						if (distantVesselLightModule[i].part.CrewCapacity > 0) {
+							if (distantVesselLightModule[i].part.protoModuleCrew.Count > 0) {
+								SwitchLight.On (distantVesselLightModule[i].part);
+							} else {
+								SwitchLight.Off (distantVesselLightModule [i].part);
+							}
 						}
+					} else if (isOn == true) {
+						SwitchLight.On (distantVesselLightModule [i].part);
+					} else {
+						SwitchLight.Off (distantVesselLightModule [i].part);
 					}
-				} else if (isOn == true) {
-					SwitchLight.On (distantVesselLightModule [i].part);
-				} else {
-					SwitchLight.Off (distantVesselLightModule [i].part);
+					i++;
 				}
-				i++;
+				distantVesselLightState = null;
+				distantVesselLightModule = null;
 			}
-			distantVesselLightState = null;
-			distantVesselLightModule = null;
+
+
 		}
 
 		#endregion
 
 		#region SunLight
 
-		private List<PartModule> activeVesselLightModule;
+		private List<List<PartModule>> closeVesselLightModule = new List<List<PartModule>>();
+		private List<Vessel> closeVessel = new List<Vessel>();
+		private int activeVesselEnum;
 
 		private Vector3d vesselPos, sunPos;
 		private RaycastHit hit;
 
-		private int layerMask = (1 << 10); // Scaled Scenery layer
+		private int layerMask = (1 << 10 | 1 << 15); // Scaled & Local Scenery layer
 		private bool inDark = false;
+		private bool activeInDark = false;
 		private float waitBetweenRay = 1.5f;
 
-		private IEnumerator FindLightOnActiveVessel (Vessel vessel)
+		private IEnumerator FindSunLight (Vessel vessel)
 		{
-			activeVesselLightModule = new List<PartModule>();
+			List<PartModule> moduleList = new List<PartModule> ();
 
 			int iSearch = 0;
 
@@ -308,10 +316,10 @@ namespace CrewLight
 						if (Regex.IsMatch(partM.toggleName, "light", RegexOptions.IgnoreCase)) {
 							if (settings.onlyNoAGpart) {
 								if (!partM.Actions.Contains(KSPActionGroup.Light)) {
-									activeVesselLightModule.Add (partM);
+									moduleList.Add (partM);
 								}
 							} else {
-								activeVesselLightModule.Add (partM);
+								moduleList.Add (partM);
 							}
 						}
 					}
@@ -319,10 +327,10 @@ namespace CrewLight
 						foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
 							if (settings.onlyNoAGpart) {
 								if (!partM.Actions.Contains(KSPActionGroup.Light)) {
-									activeVesselLightModule.Add (partM);
+									moduleList.Add (partM);
 								}
 							} else {
-								activeVesselLightModule.Add (partM);
+								moduleList.Add (partM);
 							}
 						}
 					}
@@ -331,10 +339,10 @@ namespace CrewLight
 							if (Regex.IsMatch(partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
 								if (settings.onlyNoAGpart) {
 									if (!partM.Actions.Contains(KSPActionGroup.Light)) {
-										activeVesselLightModule.Add (partM);
+										moduleList.Add (partM);
 									}
 								} else {
-									activeVesselLightModule.Add (partM);
+									moduleList.Add (partM);
 								}
 							}
 						}
@@ -344,10 +352,10 @@ namespace CrewLight
 							if (partM.ClassName == "WBILight") {
 								if (settings.onlyNoAGpart) {
 									if (!partM.Actions.Contains(KSPActionGroup.Light)) {
-										activeVesselLightModule.Add (partM);
+										moduleList.Add (partM);
 									}
 								} else {
-									activeVesselLightModule.Add (partM);
+									moduleList.Add (partM);
 								}
 							}
 						}
@@ -355,38 +363,111 @@ namespace CrewLight
 				}
 				iSearch++;
 			}
+			closeVesselLightModule.Add (moduleList);
 		}
 
-		private void OnVesselChange (Vessel vessel) {
-			StopCoroutine ("TrackSun");
-			StartCoroutine ("TrackSun", vessel);
-		}
-
-		private IEnumerator TrackSun (Vessel vessel)
+		private IEnumerator GetSunLight ()
 		{
-			yield return StartCoroutine ("FindLightOnActiveVessel", vessel);
+			List<Vessel> newCloseVessel = new List<Vessel> (closeVessel);
+			yield return new WaitForSeconds (.1f);
+
+			// Remove item from lists
+			foreach (Vessel vessel in newCloseVessel) {
+				if (FlightGlobals.VesselsLoaded.Contains(vessel) == false) {
+					closeVesselLightModule.RemoveAt (newCloseVessel.IndexOf (vessel));
+					closeVessel.Remove (vessel);
+				}
+			}
+			newCloseVessel = closeVessel;
+
+			// Add item to lists
+			List<Vessel> loadedVessels = new List<Vessel> (FlightGlobals.VesselsLoaded);
+			foreach (Vessel vessel in loadedVessels) {
+				if (newCloseVessel.Contains(vessel) == false) {
+					yield return StartCoroutine ("FindSunLight", vessel);
+					closeVessel.Add (vessel);
+				}
+			}
+
+			// Get the index of the active vessel
+			activeVesselEnum = closeVessel.FindIndex (v => v.isActiveVessel == true);
+		}
+
+		private void ClearSunLight (Vessel vesselA, Vessel vesselB)
+		{
+			StopCoroutine ("FindSunLight");
+			StopCoroutine ("GetSunLight");
+			StopCoroutine ("TrackSun");
+
+			closeVessel.Clear ();
+			closeVesselLightModule.Clear ();
+
+			StartCoroutine ("TrackSun");
+		}
+
+		private void VesselChange (Vessel vessel)
+		{
+			if (vessel == FlightGlobals.ActiveVessel) {
+				StopCoroutine ("TrackSun");
+				StopCoroutine ("GetSunLight");
+				StopCoroutine ("FindSunLight");
+
+				closeVessel.RemoveAt (activeVesselEnum);
+				closeVesselLightModule.RemoveAt (activeVesselEnum);
+
+				StartCoroutine ("TrackSun");
+			}
+		}
+
+		private IEnumerator TrackSun ()
+		{
 
 			while (true) {
-				// Get position of the sun and the vessel
+				// Get list of loaded vessel if need be
+				if (FlightGlobals.VesselsLoaded.Count != closeVessel.Count) {
+					yield return StartCoroutine ("GetSunLight");
+				}
+
+				// Store position of the active vessel and sun
 				vesselPos = FlightGlobals.ActiveVessel.transform.position;
 				sunPos = FlightGlobals.GetBodyByName ("Sun").position;
 
+				// Check if the sun is occulded
 				if (Physics.Raycast (vesselPos, sunPos, out hit, Mathf.Infinity, layerMask)) {
 					if (hit.transform != null) {
 //						Debug.Log ("[Crew Light] SunLight : hit is " + hit.transform.name);
 						if (hit.transform.name == "Sun") {
 							if (inDark) {
-								SwitchLight.AllLightsOff (activeVesselLightModule);
+								foreach (List<PartModule> moduleList in closeVesselLightModule) {
+									SwitchLight.AllLightsOff (moduleList);
+								}
 								inDark = false;
 							}
 						} else {
 							if (inDark == false) {
-								SwitchLight.AllLightsOn (activeVesselLightModule);
+								foreach (List<PartModule> moduleList in closeVesselLightModule) {
+									SwitchLight.AllLightsOn (moduleList);
+								}
 								inDark = true;
 							}
 						}
 					}
 				}
+
+				// Check for depth below the ocean
+				if (settings.useDepthLight) {
+					if (FlightGlobals.ActiveVessel.LandedOrSplashed && FlightGlobals.currentMainBody.ocean) {
+						//					int i = closeVessel.FindIndex (v => v.isActiveVessel == true);
+						if (FlightGlobals.ActiveVessel.altitude < -settings.depthThreshold) {
+							SwitchLight.AllLightsOn (closeVesselLightModule [activeVesselEnum]);
+							activeInDark = true;
+						} else if (activeInDark && inDark == false) {
+							SwitchLight.AllLightsOff (closeVesselLightModule [activeVesselEnum]);
+							activeInDark = false;
+						}
+					}
+				}
+
 				yield return new WaitForSeconds (waitBetweenRay);
 			}
 		}

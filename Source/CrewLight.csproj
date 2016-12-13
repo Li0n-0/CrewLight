@@ -30,28 +30,35 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\KSP_devTest\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\KSP_devTest\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\KSP_devTest\KSP_x64_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\KSP_devTest\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\KSP_devTest\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\KSP_devTest\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\KSP_devTest\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\..\GitHub\CrewLight\GameData\CrewLight\Source\CrewLight.cs">
+    <Compile Include="..\..\GitHub\CrewLight\Source\CrewLight.cs">
       <Link>CrewLight.cs</Link>
     </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\GameData\CrewLight\Source\ModuleLightNoAG.cs">
-      <Link>ModuleLightNoAG.cs</Link>
+    <Compile Include="..\..\GitHub\CrewLight\Source\DisableLightAG.cs">
+      <Link>DisableLightAG.cs</Link>
     </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\GameData\CrewLight\Source\Settings.cs">
+    <Compile Include="..\..\GitHub\CrewLight\Source\Settings.cs">
       <Link>Settings.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GitHub\CrewLight\Source\SwitchLight.cs">
+      <Link>SwitchLight.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

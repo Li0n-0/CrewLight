@@ -1,0 +1,5 @@
+* Refactor Lighter class so all method takes a PartModule
+
+* Transfer the settings to the stock settings in-game screen
+
+* Refactor the whole code to have one monobehavior script per "main" function
