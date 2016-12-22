@@ -20,10 +20,10 @@ namespace CrewLight
 
 		void Start ()
 		{
-			Settings settings = new Settings ();
-			settings.Load ();
-			disableCrewAG = settings.disableCrewAG;
-			disableAllAG = settings.disableAllAG;
+//			CLSettings settings = new CLSettings ();
+//			settings.Load ();
+			disableCrewAG = CLSettings.disableCrewAG;
+			disableAllAG = CLSettings.disableAllAG;
 
 			if (disableCrewAG || disableAllAG) {
 				GameEvents.onEditorPartEvent.Add (CheckForLight);

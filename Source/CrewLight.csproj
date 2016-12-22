@@ -54,11 +54,20 @@
     <Compile Include="..\..\GitHub\CrewLight\Source\DisableLightAG.cs">
       <Link>DisableLightAG.cs</Link>
     </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\Source\Settings.cs">
-      <Link>Settings.cs</Link>
-    </Compile>
     <Compile Include="..\..\GitHub\CrewLight\Source\SwitchLight.cs">
       <Link>SwitchLight.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GitHub\CrewLight\Source\CLSettings.cs">
+      <Link>CLSettings.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GitHub\CrewLight\Source\LightDirector.cs">
+      <Link>LightDirector.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GitHub\CrewLight\Source\SunLight.cs">
+      <Link>SunLight.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GitHub\CrewLight\Source\MorseLight.cs">
+      <Link>MorseLight.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
