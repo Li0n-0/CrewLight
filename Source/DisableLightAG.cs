@@ -6,24 +6,13 @@ namespace CrewLight
 	[KSPAddon(KSPAddon.Startup.EditorAny, false)]
 	public class DisableLightAG : MonoBehaviour
 	{
-		/*
-		 * 
-		 * Remove the light of crewable part from the light action group, 
-		 * only for ModuleLight and WBILight (from Wild Blue Industries by Angel-125),
-		 * ModuleAnimateGeneric and ModuleColorChanger get theirs action groups neutralize 
-		 * with MM.
-		 * 
-		 */
-
 		private bool disableCrewAG;
 		private bool disableAllAG;
 
 		void Start ()
 		{
-			Settings settings = new Settings ();
-			settings.Load ();
-			disableCrewAG = settings.disableCrewAG;
-			disableAllAG = settings.disableAllAG;
+			disableCrewAG = CLSettings.disableCrewAG;
+			disableAllAG = CLSettings.disableAllAG;
 
 			if (disableCrewAG || disableAllAG) {
 				GameEvents.onEditorPartEvent.Add (CheckForLight);
@@ -43,7 +32,6 @@ namespace CrewLight
 				if (disableCrewAG) {
 					if (part.CrewCapacity < 1) { return; }
 				}
-//				if (part.CrewCapacity > 0) {
 				if (part.Modules.Contains<ModuleColorChanger>() 
 					|| part.Modules.Contains<ModuleLight>() 
 					|| part.Modules.Contains<ModuleAnimateGeneric>() 
@@ -60,7 +48,6 @@ namespace CrewLight
 						}
 					}
 				}
-//				}
 			}
 		}
 	}
