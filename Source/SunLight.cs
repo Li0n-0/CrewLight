@@ -12,7 +12,6 @@ namespace CrewLight
 		private Vessel vessel;
 		private List<PartModule> moduleLight;
 		private bool inDark;
-		private float waitBetweenRay = 1.5f;
 
 		public void Start ()
 		{
@@ -92,7 +91,7 @@ namespace CrewLight
 
 			while (true) {
 				SetLights ();
-				yield return new WaitForSeconds (waitBetweenRay);
+				yield return new WaitForSeconds (CLSettings.waitBetweenRay);
 			}
 		}
 

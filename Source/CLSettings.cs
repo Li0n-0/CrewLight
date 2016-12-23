@@ -8,8 +8,9 @@ namespace CrewLight
 	{
 		private static ConfigNode settingsNode;
 		private static ConfigNode nodeDistantVesselLight;
-		private static ConfigNode nodeLightActionGroup;
 		private static ConfigNode nodeSunLight;
+		private static ConfigNode nodeEVALight;
+		private static ConfigNode nodeLightActionGroup;
 
 		// Default settings :
 
@@ -30,6 +31,11 @@ namespace CrewLight
 		public static bool useDepthLight = true;
 		public static double depthThreshold = 20d;
 
+		// EVA Light :
+		public static bool useSunLightEVA = true;
+		public static bool onForEVASpace = false;
+		public static bool onForEVALanded = false;
+
 		// Light Action Group :
 		public static bool disableCrewAG = true;
 		public static bool disableAllAG = false;
@@ -37,6 +43,7 @@ namespace CrewLight
 		// Internal :
 		public static List<int> morseCode;
 		public static int layerMask = (1 << 10 | 1 << 15); // Scaled & Local Scenery layer
+		public static float waitBetweenRay = 1.5f;
 		public static int maxSearch = 200;
 
 		static CLSettings ()
@@ -81,6 +88,9 @@ namespace CrewLight
 			if (settingsNode.HasNode("Sun_Light")) {
 				nodeSunLight = settingsNode.GetNode ("Sun_Light");
 			} else { return false; }
+			if (settingsNode.HasNode("EVA_Light")) {
+				nodeEVALight = settingsNode.GetNode ("EVA_Light");
+			} else { return false; }
 			if (settingsNode.HasNode("Light_Action_Group")) {
 				nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
 			} else { return false; }
@@ -102,13 +112,19 @@ namespace CrewLight
 				"depth_threshold",
 				"only_light_not_in_AG"
 			};
+			string[] paramEVALight = new string[] {
+				"use_sunlight_for_EVA",
+				"always_on_in_space",
+				"always_on_landed"
+			};
 			string[] paramLightAGValue = new string[] {
 				"disable_light_action_group_for_crew_part",
 				"disable_action_group_for_light_part"
 			};
 
 			if (nodeDistantVesselLight.HasValues (paramMorseValue) 
-				&& nodeSunLight.HasValues(paramSunLightValue)
+				&& nodeSunLight.HasValues (paramSunLightValue) 
+				&& nodeEVALight.HasValues (paramEVALight)
 				&& nodeLightActionGroup.HasValues (paramLightAGValue))
 			{
 				useMorseCode = bool.Parse (nodeDistantVesselLight.GetValue ("use_morse_code"));
@@ -126,6 +142,10 @@ namespace CrewLight
 				depthThreshold = Double.Parse (nodeSunLight.GetValue ("depth_threshold"));
 				onlyNoAGpart = bool.Parse (nodeSunLight.GetValue ("only_light_not_in_AG"));
 
+				useSunLightEVA = bool.Parse (nodeEVALight.GetValue ("use_sunlight_for_EVA"));
+				onForEVASpace = bool.Parse (nodeEVALight.GetValue ("always_on_in_space"));
+				onForEVALanded = bool.Parse (nodeEVALight.GetValue ("always_on_landed"));
+
 				disableCrewAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_light_action_group_for_crew_part"));
 				disableAllAG = bool.Parse (nodeLightActionGroup.GetValue("disable_action_group_for_light_part"));
 			} else { return false; }
@@ -139,10 +159,12 @@ namespace CrewLight
 
 			settingsNode.AddNode ("Distant_Vessel_Morse_Code");
 			settingsNode.AddNode ("Sun_Light");
+			settingsNode.AddNode ("EVA_Light");
 			settingsNode.AddNode ("Light_Action_Group");
 
 			ConfigNode nodeDistantVesselLight = settingsNode.GetNode ("Distant_Vessel_Morse_Code");
 			ConfigNode nodeSunLight = settingsNode.GetNode ("Sun_Light");
+			ConfigNode nodeEVALight = settingsNode.GetNode ("EVA_Light");
 			ConfigNode nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
 
 			// Distant Vessel :
@@ -182,6 +204,16 @@ namespace CrewLight
 
 			nodeSunLight.AddValue ("only_light_not_in_AG", onlyNoAGpart,
 				"only lights not assigned to an Action Group will be lighted when the sun fall");
+
+			// EVA Light :
+			nodeEVALight.AddValue ("use_sunlight_for_EVA", useSunLightEVA, 
+				"kerbal's headlights will go on/off as the sun rise/fall");
+
+			nodeEVALight.AddValue ("always_on_in_space", onForEVASpace, 
+				"always turn on the headlights when EVA in space");
+
+			nodeEVALight.AddValue ("always_on_landed", onForEVALanded, 
+				"always turn on the headlights when EVA landed");
 
 			// Editor Light :
 			nodeLightActionGroup.AddValue ("disable_light_action_group_for_crew_part", disableCrewAG, 

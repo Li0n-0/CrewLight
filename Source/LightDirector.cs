@@ -15,10 +15,16 @@ namespace CrewLight
 			GameEvents.onVesselChange.Add (CrewLightVessel);
 			CrewLightVessel (FlightGlobals.ActiveVessel);
 
+			// EVALight :
+			if (CLSettings.useSunLightEVA) {
+				GameEvents.onCrewOnEva.Add (SunLightEVA);
+			}
+
 			// MorseLight :
 			if (CLSettings.useMorseCode) {
 				GameEvents.onVesselLoaded.Add (MorseLightAddVessel);
 			}
+
 			// SunLight :
 			if (CLSettings.useSunLight) {
 				GameEvents.onVesselGoOffRails.Add (SunLightAddVessel);
@@ -33,10 +39,16 @@ namespace CrewLight
 			GameEvents.onCrewTransferred.Remove (CrewLightTransfer);
 			GameEvents.onVesselChange.Remove (CrewLightVessel);
 
+			// EVALight :
+			if (CLSettings.useSunLightEVA) {
+				GameEvents.onCrewOnEva.Remove (SunLightEVA);
+			}
+
 			// MorseLight :
 			if (CLSettings.useMorseCode) {
 				GameEvents.onVesselLoaded.Remove (MorseLightAddVessel);
 			}
+
 			// SunLight :
 			if (CLSettings.useSunLight) {
 				GameEvents.onVesselGoOffRails.Remove (SunLightAddVessel);
@@ -73,6 +85,46 @@ namespace CrewLight
 
 		#endregion
 
+		#region EVALight
+
+		private void SunLightEVA (GameEvents.FromToAction<Part, Part> eData)
+		{
+			if (eData.to.Modules.Contains<KerbalEVA> ())
+			{
+				if (CLSettings.onForEVASpace && (eData.from.vessel.situation == Vessel.Situations.ESCAPING 
+					|| eData.from.vessel.situation == Vessel.Situations.FLYING 
+					|| eData.from.vessel.situation == Vessel.Situations.ORBITING 
+					|| eData.from.vessel.situation == Vessel.Situations.SUB_ORBITAL)) {
+
+					eData.to.Modules.GetModule<KerbalEVA> ().lampOn = true;
+					return;
+				}
+				if (CLSettings.onForEVALanded && (eData.from.vessel.situation == Vessel.Situations.LANDED 
+					|| eData.from.vessel.situation == Vessel.Situations.PRELAUNCH 
+					|| eData.from.vessel.situation == Vessel.Situations.SPLASHED)) {
+
+					eData.to.Modules.GetModule<KerbalEVA> ().lampOn = true;
+					return;
+				}
+
+				bool isSunShine = false;
+				RaycastHit hit;
+				Vector3d vesselPos = eData.to.vessel.GetWorldPos3D ();
+				Vector3d sunPos = FlightGlobals.GetBodyByName ("Sun").position;
+				if (Physics.Raycast(vesselPos, sunPos, out hit, Mathf.Infinity, CLSettings.layerMask)) {
+					if (hit.transform.name == "Sun") {
+						isSunShine = true;
+					}
+				}
+
+				if (!isSunShine) {
+					eData.to.Modules.GetModule<KerbalEVA> ().lampOn = true;
+				}
+			}
+		}
+
+		#endregion
+
 		#region MorseLight
 
 		private void MorseLightAddVessel (Vessel vessel)
@@ -91,12 +143,14 @@ namespace CrewLight
 			// If a vessel's part count changed then delete all instance of SunLight
 			// on this vessel and add a new one, that will automatically search all 
 			// parts of the vessel for lightable one
-			foreach (Part part in vessel.Parts) {
-				if (part.GetComponent<SunLight> () != null) {
-					Destroy (part.GetComponent<SunLight> ());
+			if (vessel.GetComponent<SunLight> () != null) {
+				foreach (Part part in vessel.Parts) {
+					if (part.GetComponent<SunLight> () != null) {
+						Destroy (part.GetComponent<SunLight> ());
+					}
 				}
+				vessel.gameObject.AddComponent<SunLight> ();
 			}
-			vessel.gameObject.AddComponent<SunLight> ();
 		}
 
 		private void SunLightAddVessel (Vessel vessel)

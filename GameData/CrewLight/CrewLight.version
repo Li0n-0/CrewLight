@@ -1,11 +1,11 @@
 {
     "NAME":"Crew Light",
     "URL":"https://raw.githubusercontent.com/Li0n-0/CrewLight/master/GameData/CrewLight/CrewLight.version",
-    "DOWNLOAD":"https://github.com/Li0n-0/CrewLigth/releases",
+    "DOWNLOAD":"https://github.com/Li0n-0/CrewLight/releases",
     "VERSION":
     {
         "MAJOR":0,
-        "MINOR":8,
+        "MINOR":9,
         "PATCH":0,
         "BUILD":0
     },
@@ -19,7 +19,7 @@
     {
         "MAJOR":1,
         "MINOR":2,
-        "PATCH":1
+        "PATCH":2
     },
     "KSP_VERSION_MAX":
     {
