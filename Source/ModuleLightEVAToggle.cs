@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CrewLight
 {
-	public class ModuleLightToggle : PartModule
+	public class ModuleLightEVAToggle : PartModule
 	{
 		private ModuleLight moduleLight;
 
