@@ -108,6 +108,12 @@ namespace CrewLight
 					iSearch = 0;
 				}
 
+				// Check if the part is a landing gear/wheel
+				if (part.Modules.Contains<ModuleStatusLight> ()) {
+					iSearch++;
+					break;
+				}
+
 				// Check if part is uncrewed
 				if (part.CrewCapacity == 0) {
 

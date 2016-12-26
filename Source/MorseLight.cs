@@ -135,6 +135,12 @@ namespace CrewLight
 					iSearch = 0;
 				}
 
+				// Check for retractable landing gear/whell
+				if (part.Modules.Contains<ModuleStatusLight> ()) {
+					iSearch++;
+					break;
+				}
+
 				// Check for lightable modules
 				if (part.Modules.Contains<ModuleColorChanger> ()) {
 					ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();
