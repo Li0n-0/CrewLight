@@ -98,11 +98,13 @@ namespace CrewLight
 		private IEnumerator FindLightPart ()
 		{
 			moduleLight = new List<PartModule> ();
-			int iSearch = 0;
+
+			int iSearch = -1;
 
 			yield return new WaitForSeconds (.1f);
 
 			foreach (Part part in vessel.Parts) {
+				iSearch++;
 				if (iSearch >= CLSettings.maxSearch) {
 					yield return new WaitForSeconds (.1f);
 					iSearch = 0;
@@ -110,7 +112,6 @@ namespace CrewLight
 
 				// Check if the part is a landing gear/wheel
 				if (part.Modules.Contains<ModuleStatusLight> ()) {
-					iSearch++;
 					break;
 				}
 
@@ -167,7 +168,6 @@ namespace CrewLight
 						}
 					}
 				}
-				iSearch++;
 			}
 		}
 

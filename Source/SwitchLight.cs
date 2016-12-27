@@ -93,6 +93,9 @@ namespace CrewLight
 					}
 					break;
 				case "ModuleLight":
+				case "ModuleStockLightColoredLens":
+				case "ModuleMultiPointSurfaceLight":
+				case "ModuleColoredLensLight":
 					partM.GetComponent<ModuleLight> ().LightsOn ();
 					break;
 				case "ModuleAnimateGeneric":
@@ -117,6 +120,9 @@ namespace CrewLight
 					}
 					break;
 				case "ModuleLight":
+				case "ModuleStockLightColoredLens":
+				case "ModuleMultiPointSurfaceLight":
+				case "ModuleColoredLensLight":
 					partM.GetComponent<ModuleLight> ().LightsOff ();
 					break;
 				case "ModuleAnimateGeneric":
