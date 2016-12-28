@@ -9,7 +9,7 @@ namespace CrewLight
 	public class MorseLight : MonoBehaviour
 	{
 		private Vessel vessel;
-		private List<PartModule> moduleLight;
+		private List<PartModule> modulesLight;
 		private List<bool?> stateLight;
 		private double offLimit = 2600d;
 
@@ -63,30 +63,30 @@ namespace CrewLight
 				vesselDistance = GetDistance();
 			}
 
-			SwitchLight.AllLightsOff (moduleLight);
+			SwitchLight.AllLightsOff (modulesLight);
 			yield return new WaitForSeconds (CLSettings.ditDuration);
 
 			// Morse message
 			foreach (int c in CLSettings.morseCode) {
 				switch (c) {
 				case 0:
-					SwitchLight.AllLightsOn (moduleLight);
+					SwitchLight.AllLightsOn (modulesLight);
 					yield return new WaitForSeconds (CLSettings.ditDuration);
 					break;
 				case 1:
-					SwitchLight.AllLightsOn (moduleLight);
+					SwitchLight.AllLightsOn (modulesLight);
 					yield return new WaitForSeconds (CLSettings.dahDuration);
 					break;
 				case 2:
-					SwitchLight.AllLightsOff (moduleLight);
+					SwitchLight.AllLightsOff (modulesLight);
 					yield return new WaitForSeconds (CLSettings.letterSpaceDuration);
 					break;
 				case 3:
-					SwitchLight.AllLightsOff (moduleLight);
+					SwitchLight.AllLightsOff (modulesLight);
 					yield return new WaitForSeconds (CLSettings.wordSpaceDuration);
 					break;
 				case 4:
-					SwitchLight.AllLightsOff (moduleLight);
+					SwitchLight.AllLightsOff (modulesLight);
 					yield return new WaitForSeconds (CLSettings.symbolSpaceDuration);
 					break;
 				}
@@ -99,21 +99,21 @@ namespace CrewLight
 		private void LightPreviousState ()
 		{
 			// Settings lights to theirs previous state
-			if (stateLight != null && moduleLight != null) {
+			if (stateLight != null && modulesLight != null) {
 				int i = 0;
 				foreach (bool? isOn in stateLight) {
 					if (isOn == null) {
-						if (moduleLight[i].part.CrewCapacity > 0) {
-							if (moduleLight[i].part.protoModuleCrew.Count > 0) {
-								SwitchLight.On (moduleLight[i].part);
+						if (modulesLight[i].part.CrewCapacity > 0) {
+							if (modulesLight[i].part.protoModuleCrew.Count > 0) {
+								SwitchLight.On (modulesLight[i].part);
 							} else {
-								SwitchLight.Off (moduleLight [i].part);
+								SwitchLight.Off (modulesLight [i].part);
 							}
 						}
 					} else if (isOn == true) {
-						SwitchLight.On (moduleLight [i].part);
+						SwitchLight.On (modulesLight [i].part);
 					} else {
-						SwitchLight.Off (moduleLight [i].part);
+						SwitchLight.Off (modulesLight [i].part);
 					}
 					i++;
 				}
@@ -122,24 +122,31 @@ namespace CrewLight
 
 		private IEnumerator FindLightPart ()
 		{
-			moduleLight = new List<PartModule>();
+			modulesLight = new List<PartModule> ();
+
 			stateLight = new List<bool?>();
 
-			int iSearch = 0;
+			int iSearch = -1;
 
 			yield return new WaitForSeconds (.1f);
 
 			foreach (Part part in vessel.Parts) {
+				iSearch++;
 				if (iSearch >= CLSettings.maxSearch) {
 					yield return new WaitForSeconds (.1f);
 					iSearch = 0;
+				}
+
+				// Check for retractable landing gear/whell
+				if (part.Modules.Contains<ModuleStatusLight> ()) {
+					break;
 				}
 
 				// Check for lightable modules
 				if (part.Modules.Contains<ModuleColorChanger> ()) {
 					ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();
 					if (Regex.IsMatch(partM.toggleName, "light", RegexOptions.IgnoreCase)) {
-						moduleLight.Add (partM);
+						modulesLight.Add (partM);
 						if (partM.animState) {
 							stateLight.Add (true);
 						} else {
@@ -149,7 +156,7 @@ namespace CrewLight
 				}
 				if (part.Modules.Contains<ModuleLight> ()) {
 					foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
-						moduleLight.Add (partM);
+						modulesLight.Add (partM);
 						if (partM.isOn) {
 							stateLight.Add (true);
 						} else {
@@ -160,7 +167,7 @@ namespace CrewLight
 				if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
 					foreach (ModuleAnimateGeneric partM in part.Modules.GetModules<ModuleAnimateGeneric>()) {
 						if (Regex.IsMatch(partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
-							moduleLight.Add (partM);
+							modulesLight.Add (partM);
 							if (partM.animSwitch == false) {
 								stateLight.Add (true);
 							} else {
@@ -172,12 +179,11 @@ namespace CrewLight
 				if (part.Modules.Contains ("WBILight")) {
 					foreach (PartModule partM in part.Modules) {
 						if (partM.ClassName == "WBILight") {
-							moduleLight.Add (partM);
+							modulesLight.Add (partM);
 							stateLight.Add (null);
 						}
 					}
 				}
-				iSearch++;
 			}
 		}
 

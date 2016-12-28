@@ -10,7 +10,7 @@ namespace CrewLight
 	{
 
 		private Vessel vessel;
-		private List<PartModule> moduleLight;
+		private List<PartModule> modulesLight;
 		private bool inDark;
 
 		public void Start ()
@@ -62,7 +62,7 @@ namespace CrewLight
 			if (CLSettings.useDepthLight) {
 				if (IsInDepth ()) {
 					if (!inDark) {
-						SwitchLight.AllLightsOn (moduleLight);
+						SwitchLight.AllLightsOn (modulesLight);
 						inDark = true;
 					}
 					return;
@@ -72,12 +72,12 @@ namespace CrewLight
 			// Sun Lights :
 			if (IsSunShine ()) {
 				if (inDark) {
-					SwitchLight.AllLightsOff (moduleLight);
+					SwitchLight.AllLightsOff (modulesLight);
 					inDark = false;
 				}
 			} else {
 				if (!inDark) {
-					SwitchLight.AllLightsOn (moduleLight);
+					SwitchLight.AllLightsOn (modulesLight);
 					inDark = true;
 				}
 			}
@@ -97,15 +97,22 @@ namespace CrewLight
 
 		private IEnumerator FindLightPart ()
 		{
-			moduleLight = new List<PartModule> ();
-			int iSearch = 0;
+			modulesLight = new List<PartModule> ();
+
+			int iSearch = -1;
 
 			yield return new WaitForSeconds (.1f);
 
 			foreach (Part part in vessel.Parts) {
+				iSearch++;
 				if (iSearch >= CLSettings.maxSearch) {
 					yield return new WaitForSeconds (.1f);
 					iSearch = 0;
+				}
+
+				// Check if the part is a landing gear/wheel
+				if (part.Modules.Contains<ModuleStatusLight> ()) {
+					break;
 				}
 
 				// Check if part is uncrewed
@@ -116,10 +123,10 @@ namespace CrewLight
 						if (Regex.IsMatch(partM.toggleName, "light", RegexOptions.IgnoreCase)) {
 							if (CLSettings.onlyNoAGpart) {
 								if (!partM.Actions.Contains(KSPActionGroup.Light)) {
-									moduleLight.Add (partM);
+									modulesLight.Add (partM);
 								}
 							} else {
-								moduleLight.Add (partM);
+								modulesLight.Add (partM);
 							}
 						}
 					}
@@ -127,10 +134,10 @@ namespace CrewLight
 						foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
 							if (CLSettings.onlyNoAGpart) {
 								if (!partM.Actions.Contains(KSPActionGroup.Light)) {
-									moduleLight.Add (partM);
+									modulesLight.Add (partM);
 								}
 							} else {
-								moduleLight.Add (partM);
+								modulesLight.Add (partM);
 							}
 						}
 					}
@@ -139,10 +146,10 @@ namespace CrewLight
 							if (Regex.IsMatch(partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
 								if (CLSettings.onlyNoAGpart) {
 									if (!partM.Actions.Contains(KSPActionGroup.Light)) {
-										moduleLight.Add (partM);
+										modulesLight.Add (partM);
 									}
 								} else {
-									moduleLight.Add (partM);
+									modulesLight.Add (partM);
 								}
 							}
 						}
@@ -152,16 +159,15 @@ namespace CrewLight
 							if (partM.ClassName == "WBILight") {
 								if (CLSettings.onlyNoAGpart) {
 									if (!partM.Actions.Contains(KSPActionGroup.Light)) {
-										moduleLight.Add (partM);
+										modulesLight.Add (partM);
 									}
 								} else {
-									moduleLight.Add (partM);
+									modulesLight.Add (partM);
 								}
 							}
 						}
 					}
 				}
-				iSearch++;
 			}
 		}
 
