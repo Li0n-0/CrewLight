@@ -66,6 +66,9 @@
     <Compile Include="..\..\GitHub\CrewLight\Source\MorseLight.cs">
       <Link>MorseLight.cs</Link>
     </Compile>
+    <Compile Include="..\..\GitHub\CrewLight\Source\ModuleLightEVAToggle.cs">
+      <Link>ModuleLightEVAToggle.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

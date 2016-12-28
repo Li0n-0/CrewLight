@@ -83,24 +83,24 @@ namespace CrewLight
 			}
 		}
 
-		public static void AllLightsOn (List<PartModule> moduleLight)
+		public static void AllLightsOn (List<PartModule> modulesLight)
 		{
-			foreach (PartModule partM in moduleLight) {
+			foreach (PartModule partM in modulesLight) {
 				switch (partM.ClassName) {
 				case "ModuleColorChanger":
-					if (partM.GetComponent<ModuleColorChanger> ().animState == false) {
-						partM.GetComponent<ModuleColorChanger> ().ToggleEvent ();
+					if (!partM.GetComponent<ModuleColorChanger> ().animState) {
+						partM.SendMessage ("ToggleEvent");
 					}
 					break;
 				case "ModuleLight":
 				case "ModuleStockLightColoredLens":
 				case "ModuleMultiPointSurfaceLight":
 				case "ModuleColoredLensLight":
-					partM.GetComponent<ModuleLight> ().LightsOn ();
+					partM.SendMessage ("LightsOn");
 					break;
 				case "ModuleAnimateGeneric":
 					if (partM.GetComponent<ModuleAnimateGeneric> ().animSwitch) {
-						partM.GetComponent<ModuleAnimateGeneric> ().Toggle ();
+						partM.SendMessage ("Toggle");
 					}
 					break;
 				case "WBILight":
@@ -110,24 +110,24 @@ namespace CrewLight
 			}
 		}
 
-		public static void AllLightsOff (List<PartModule> moduleLight)
+		public static void AllLightsOff (List<PartModule> modulesLight)
 		{
-			foreach (PartModule partM in moduleLight) {
+			foreach (PartModule partM in modulesLight) {
 				switch (partM.ClassName) {
 				case "ModuleColorChanger":
 					if (partM.GetComponent<ModuleColorChanger> ().animState) {
-						partM.GetComponent<ModuleColorChanger> ().ToggleEvent ();
+						partM.SendMessage ("ToggleEvent");
 					}
 					break;
 				case "ModuleLight":
 				case "ModuleStockLightColoredLens":
 				case "ModuleMultiPointSurfaceLight":
 				case "ModuleColoredLensLight":
-					partM.GetComponent<ModuleLight> ().LightsOff ();
+					partM.SendMessage ("LightsOff");
 					break;
 				case "ModuleAnimateGeneric":
 					if (partM.GetComponent<ModuleAnimateGeneric> ().animSwitch == false) {
-						partM.GetComponent<ModuleAnimateGeneric> ().Toggle ();
+						partM.SendMessage ("Toggle");
 					}
 					break;
 				case "WBILight":
@@ -135,6 +135,11 @@ namespace CrewLight
 					break;
 				}
 			}
+		}
+
+		private static void D (String str)
+		{
+			Debug.Log ("[Crew Light - SwitchLight] : " + str);
 		}
 	}
 }
