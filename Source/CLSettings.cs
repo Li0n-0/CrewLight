@@ -17,7 +17,7 @@ namespace CrewLight
 		// Distant Lightning :
 		public static bool useMorseCode = true;
 		public static bool onlyForControllable = false;
-		public static string morseCodeStr = "_._";
+		public static string morseCodeStr = "_._|...|.__.";
 		public static double distance = 200d;
 		public static float ditDuration = .9f;
 		public static float dahDuration = 2f;
