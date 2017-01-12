@@ -40,11 +40,11 @@ Vessel's lights are divided into 3 groups :
   
   ### How to modify how it works ?
   
-  There is a file 'Settings.cfg' in 'Kerbal Space Program/GameData/CrewLight/PluginData/' with some variables to tweak, names and comment should be explicit enough. Most usefull one are :
-  * 'morse_code' : change the morse message sent by distant vessel, [here](https://commons.wikimedia.org/wiki/File:International_Morse_Code.svg) you can find a Morse alphabet
-  * 'distance' : set the distance at wich the Morse message begins
-  * 'only_light_not_in_AG' : if 'False' every light will toggle according to sunlight
-  * 'always_on_in_space' : if 'True' kerbal who un-board will always turn their lights on while on orbit
+  There is a file `Settings.cfg` in `Kerbal Space Program/GameData/CrewLight/PluginData/` with some variables to tweak, names and comment should be explicit enough. Most usefull one are :
+  * `morse_code` : change the morse message sent by distant vessel, [here](https://commons.wikimedia.org/wiki/File:International_Morse_Code.svg) you can find a Morse alphabet
+  * `distance` : set the distance at wich the Morse message begins
+  * `only_light_not_in_AG` : if `False` every light will toggle according to sunlight
+  * `always_on_in_space` : if `True` kerbal who un-board will always turn their lights on while on orbit
   
   
   ### What is needed ?
