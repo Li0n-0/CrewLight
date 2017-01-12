@@ -5,7 +5,7 @@
 
 ### What does it do ?
 
-### It automatize light managment !
+### It automatize lights managment !
 
 #### Every part that currently hold crew gets its lights turning on
 
@@ -22,7 +22,7 @@
 ![GIF of MorseLight](http://i.imgur.com/YlwWKMr.gif)
 
 
-#### Kerbal on EVA can toggle light
+#### Kerbal on EVA can toggle lights
 
 ![GIF of EVAToggleLight](http://i.imgur.com/DO9GwbO.gif)
 
@@ -51,6 +51,11 @@ There is a file `Settings.cfg` in `Kerbal Space Program/GameData/CrewLight/Plugi
 ### What is needed ?
   
 [ModuleManager](http://forum.kerbalspaceprogram.com/index.php?/topic/50533-121-module-manager-275-november-29th-2016-better-late-than-never/) is the only dependency, all credit go to ialdabaoth and sarbian
+
+
+### Know issues :
+
+Lights on kerbal's helmet don't turn on/off as the sun rises/falls. Lights will be turned on if the kerbal un-board in the dark but status of the sunlight won't be checked after that.
 
 
 ### What to do if it doesn't work ?
