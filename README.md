@@ -68,6 +68,6 @@ Report it to [Github](https://github.com/Li0n-0/CrewLight) or the [KSP forum]()
 
 *This is my first mod for KSP and one of my first working C# code, I've tested it on every situation I could think of but it may have bugs left.*
 
-A big thanks to all the modders/users of the KSP forum who have hepled me, direcly and by answering question before I posted them.
+**A big thanks to all the modders/users of the KSP forum who have hepled me, direcly and by answering question before I posted them** :wink:
 
 License is MIT
