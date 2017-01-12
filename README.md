@@ -31,7 +31,7 @@
 ### How does it works ?
 
 Vessel's lights are divided into 3 groups : 
-* **Lights of crewable part :**
+* **Lights of crew-able part :**
   * They will remain off until a kerbal gets on-board
 * **Lights NOT in the light action group : _(and kerbal's helmet light)_**
   * They'll go on when the sun's fall, off when it rises
@@ -43,21 +43,21 @@ This mod rely on the light action group to determine which light belongs to whic
   
 ### How to modify how it works ?
   
-There is a file `Settings.cfg` in `Kerbal Space Program/GameData/CrewLight/PluginData/` with some variables to tweak, names and comment should be explicit enough. Most usefull one are :
+There is a file `Settings.cfg` in `Kerbal Space Program/GameData/CrewLight/PluginData/` with some variables to tweak, names and comment should be explicit enough. Most useful one are :
 * `morse_code` : change the morse message sent by distant vessel, [here](https://commons.wikimedia.org/wiki/File:International_Morse_Code.svg) you can find a Morse alphabet
-* `distance` : set the distance at wich the Morse message begins
+* `distance` : set the distance at which the Morse message begins
 * `only_light_not_in_AG` : if `False` every light will toggle according to sunlight
-* `always_on_in_space` : if `True` kerbal who un-board will always turn their lights on while on orbit
+* `always_on_in_space` : if `True` kerbal who disembark will always turn their lights on while on orbit
   
   
 ### What is needed ?
   
-[ModuleManager](http://forum.kerbalspaceprogram.com/index.php?/topic/50533-121-module-manager-275-november-29th-2016-better-late-than-never/) is the only dependency, all credit go to ialdabaoth and sarbian
+[ModuleManager](http://forum.kerbalspaceprogram.com/index.php?/topic/50533-121-module-manager-275-november-29th-2016-better-late-than-never/) is the only dependency, all credits go to ialdabaoth and sarbian
 
 
 ### Know issues :
 
-Lights on kerbal's helmet don't turn on/off as the sun rises/falls. Lights will be turned on if the kerbal un-board in the dark but status of the sunlight won't be checked after that.
+Lights on kerbal's helmet don't turn on/off as the sun rises/falls. Lights will be turned on if the kerbal disembark in the dark but status of the sunlight won't be checked after that.
 
 
 ### What to do if it doesn't work ?
@@ -68,6 +68,6 @@ Report it to [Github](https://github.com/Li0n-0/CrewLight) or the [KSP forum]()
 
 *This is my first mod for KSP and one of my first working C# code, I've tested it on every situation I could think of but it may have bugs left.*
 
-**A big thanks to all the modders/users of the KSP forum who have hepled me, direcly and by answering question before I posted them** :wink:
+**A big thanks to all the modders/users of the KSP forum who have helped me, directly and by answering question before I posted them** :wink:
 
 License is MIT
