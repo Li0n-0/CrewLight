@@ -11,31 +11,32 @@
 
 ![GIF of the crew transfer](http://i.imgur.com/QUqylip.gif)
 
+
 #### Lights react to the sunshine
 
 ![GIF of Sunlight](http://i.imgur.com/hw9wEd8.gif)
 
-#### Kerbal on EVA can toggle light
-
-![GIF of EVAToggleLight](http://i.imgur.com/DO9GwbO.gif)
 
 #### When approaching a distant vessel its lights will blink, sending you a welcoming message in Morse code
 
 ![GIF of MorseLight](http://i.imgur.com/YlwWKMr.gif)
 
 
+#### Kerbal on EVA can toggle light
+
+![GIF of EVAToggleLight](http://i.imgur.com/DO9GwbO.gif)
+
+
+
 ### How does it works ?
 
 Vessel's lights are divided into 3 groups : 
-* #### Lights of crewable part :
+* **Lights of crewable part :**
   * They will remain off until a kerbal gets on-board
-* #### Lights NOT in the light action group :
+* **Lights NOT in the light action group : *(and kerbal's light)***
   * They'll go on when the sun's fall, off when it rises
-* #### Other Lights :
+* **Other Lights :**
   * They will work as usual, toggling by the light action group
-  
-#### EVA light (of helmet's light) :
-  * When a kerbal un-boards, his light will go on if the sun isn't shinning
   
   
 ### How to modify how it works ?
@@ -49,4 +50,16 @@ There is a file `Settings.cfg` in `Kerbal Space Program/GameData/CrewLight/Plugi
   
 ### What is needed ?
   
-[ModuleManager]() is the only dependency
+[ModuleManager](http://forum.kerbalspaceprogram.com/index.php?/topic/50533-121-module-manager-275-november-29th-2016-better-late-than-never/) is the only dependency, all credit go to ialdabaoth and sarbian
+
+
+### What to do if it doesn't work ?
+
+Report it to [Github](https://github.com/Li0n-0/CrewLight) or the [KSP forum]()
+
+
+
+*This is my first mod for KSP and one of my first working C# code, I've tested it on every situation I could think of but it may have bugs left*
+A big thanks to all the modders/users of the KSP forum who have hepled me, direcly and by answering question before I posted them.
+
+License is MIT
