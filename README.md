@@ -33,7 +33,7 @@
 Vessel's lights are divided into 3 groups : 
 * **Lights of crewable part :**
   * They will remain off until a kerbal gets on-board
-* **Lights NOT in the light action group : *(and kerbal's light)***
+* **Lights NOT in the light action group : _(and kerbal's helmet light)_**
   * They'll go on when the sun's fall, off when it rises
 * **Other Lights :**
   * They will work as usual, toggling by the light action group
@@ -59,7 +59,8 @@ Report it to [Github](https://github.com/Li0n-0/CrewLight) or the [KSP forum]()
 
 
 
-*This is my first mod for KSP and one of my first working C# code, I've tested it on every situation I could think of but it may have bugs left*
+*This is my first mod for KSP and one of my first working C# code, I've tested it on every situation I could think of but it may have bugs left.*
+
 A big thanks to all the modders/users of the KSP forum who have hepled me, direcly and by answering question before I posted them.
 
 License is MIT
