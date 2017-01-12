@@ -38,6 +38,8 @@ Vessel's lights are divided into 3 groups :
 * **Other Lights :**
   * They will work as usual, toggling by the light action group
   
+This mod rely on the light action group to determine which light belongs to which group, in stock KSP you can change action group only in the editor, so no lights on all crafts already launched will react to the sun rising/falling. To change action group in flight you will need the mod [Action Groups Extended](http://forum.kerbalspaceprogram.com/index.php?/topic/67235-122dec1016-action-groups-extended-250-action-groups-in-flight-editing-now-kosremotetech/), by Diazo.
+  
   
 ### How to modify how it works ?
   
