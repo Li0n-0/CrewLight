@@ -30,6 +30,8 @@ namespace CrewLight
 		public static bool onlyNoAGpart = true;
 		public static bool useDepthLight = true;
 		public static double depthThreshold = 20d;
+		public static float delayLowTimeWarp = 1.5f;
+		public static float delayHighTimeWarp = .1f;
 
 		// EVA Light :
 		public static bool useSunLightEVA = true;
@@ -43,7 +45,6 @@ namespace CrewLight
 		// Internal :
 		public static List<int> morseCode;
 		public static int layerMask = (1 << 10 | 1 << 15); // Scaled & Local Scenery layer
-		public static float waitBetweenRay = 1.5f;
 		public static int maxSearch = 200;
 
 		static CLSettings ()
@@ -110,7 +111,9 @@ namespace CrewLight
 				"use_sun_light",
 				"use_depth_light",
 				"depth_threshold",
-				"only_light_not_in_AG"
+				"only_light_not_in_AG",
+				"delay_in_low_timewarp",
+				"delay_in_high_timewarp"
 			};
 			string[] paramEVALight = new string[] {
 				"use_sunlight_for_EVA",
@@ -141,6 +144,8 @@ namespace CrewLight
 				useDepthLight = bool.Parse (nodeSunLight.GetValue ("use_depth_light"));
 				depthThreshold = Double.Parse (nodeSunLight.GetValue ("depth_threshold"));
 				onlyNoAGpart = bool.Parse (nodeSunLight.GetValue ("only_light_not_in_AG"));
+				delayLowTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_low_timewarp"));
+				delayHighTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_high_timewarp"));
 
 				useSunLightEVA = bool.Parse (nodeEVALight.GetValue ("use_sunlight_for_EVA"));
 				onForEVASpace = bool.Parse (nodeEVALight.GetValue ("always_on_in_space"));
@@ -204,6 +209,14 @@ namespace CrewLight
 
 			nodeSunLight.AddValue ("only_light_not_in_AG", onlyNoAGpart,
 				"only lights not assigned to an Action Group will be lighted when the sun fall");
+
+			nodeSunLight.AddValue ("delay_in_low_timewarp", delayLowTimeWarp, 
+				"delay between check of the sun position when in physic timewrap, increase for better performance, " +
+				"lower for a quicker response of the lights");
+
+			nodeSunLight.AddValue ("delay_in_high_timewarp", delayHighTimeWarp, 
+				"delay between check of the sun position when in on-rail timewrap, increase for better performance, " +
+				"lower for a quicker response of the lights");
 
 			// EVA Light :
 			nodeEVALight.AddValue ("use_sunlight_for_EVA", useSunLightEVA, 

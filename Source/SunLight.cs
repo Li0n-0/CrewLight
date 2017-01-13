@@ -91,7 +91,11 @@ namespace CrewLight
 
 			while (true) {
 				SetLights ();
-				yield return new WaitForSeconds (CLSettings.waitBetweenRay);
+				if (TimeWarp.CurrentRate < 5f) {
+					yield return new WaitForSeconds (CLSettings.delayLowTimeWarp);
+				} else {
+					yield return new WaitForSeconds (CLSettings.delayHighTimeWarp);
+				}
 			}
 		}
 
