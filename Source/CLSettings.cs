@@ -11,6 +11,7 @@ namespace CrewLight
 		private static ConfigNode nodeSunLight;
 		private static ConfigNode nodeEVALight;
 		private static ConfigNode nodeLightActionGroup;
+		private static ConfigNode nodeVesselLightsOnEVA;
 
 		// Default settings :
 
@@ -41,6 +42,10 @@ namespace CrewLight
 		// Light Action Group :
 		public static bool disableCrewAG = true;
 		public static bool disableAllAG = false;
+
+		// Toggle vessel lights on EVA
+		public static bool useVesselLightsOnEVA = true;
+		public static bool lightSymLights = false;
 
 		// Internal :
 		public static List<int> morseCode;
@@ -95,6 +100,9 @@ namespace CrewLight
 			if (settingsNode.HasNode("Light_Action_Group")) {
 				nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
 			} else { return false; }
+			if (settingsNode.HasNode("Toggle_Vessel_Lights_On_EVA")) {
+				nodeVesselLightsOnEVA = settingsNode.GetNode ("Toggle_Vessel_Lights_On_EVA");
+			} else { return false; }
 
 			string[] paramMorseValue = new string[] {
 				"use_morse_code",
@@ -123,6 +131,10 @@ namespace CrewLight
 			string[] paramLightAGValue = new string[] {
 				"disable_light_action_group_for_crew_part",
 				"disable_action_group_for_light_part"
+			};
+			string[] paramVesselLightOnEVA = new string[] {
+				"enable_EVA_toggle_of_vessel_lights",
+				"toggle_symmetric_lights"
 			};
 
 			if (nodeDistantVesselLight.HasValues (paramMorseValue) 
@@ -153,6 +165,9 @@ namespace CrewLight
 
 				disableCrewAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_light_action_group_for_crew_part"));
 				disableAllAG = bool.Parse (nodeLightActionGroup.GetValue("disable_action_group_for_light_part"));
+
+				useVesselLightsOnEVA = bool.Parse (nodeVesselLightsOnEVA.GetValue ("enable_EVA_toggle_of_vessel_lights"));
+				lightSymLights = bool.Parse (nodeVesselLightsOnEVA.GetValue ("toggle_symmetric_lights"));
 			} else { return false; }
 
 			return true;
@@ -166,11 +181,13 @@ namespace CrewLight
 			settingsNode.AddNode ("Sun_Light");
 			settingsNode.AddNode ("EVA_Light");
 			settingsNode.AddNode ("Light_Action_Group");
+			settingsNode.AddNode ("Toggle_Vessel_Lights_On_EVA");
 
 			ConfigNode nodeDistantVesselLight = settingsNode.GetNode ("Distant_Vessel_Morse_Code");
 			ConfigNode nodeSunLight = settingsNode.GetNode ("Sun_Light");
 			ConfigNode nodeEVALight = settingsNode.GetNode ("EVA_Light");
 			ConfigNode nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
+			ConfigNode nodeVesselLightsOnEVA = settingsNode.GetNode ("Toggle_Vessel_Lights_On_EVA");
 
 			// Distant Vessel :
 			nodeDistantVesselLight.AddValue ("use_morse_code", useMorseCode);
@@ -234,6 +251,12 @@ namespace CrewLight
 
 			nodeLightActionGroup.AddValue ("disable_action_group_for_light_part", disableAllAG, 
 				"remove all the light part from the Light Action Group");
+
+			// Toggle Vessel Lights On EVA
+			nodeVesselLightsOnEVA.AddValue ("enable_EVA_toggle_of_vessel_lights", useVesselLightsOnEVA);
+
+			nodeVesselLightsOnEVA.AddValue ("toggle_symmetric_lights", lightSymLights, 
+				"if true all symmetrical lights will respond to the toggle");
 
 			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
 		}
