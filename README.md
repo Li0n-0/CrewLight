@@ -62,7 +62,7 @@ Lights on kerbal's helmet don't turn on/off as the sun rises/falls. Lights will 
 
 ### What to do if it doesn't work ?
 
-Report it to [Github](https://github.com/Li0n-0/CrewLight) or the [KSP forum]()
+Report it to [Github](https://github.com/Li0n-0/CrewLight) or the [KSP forum](http://forum.kerbalspaceprogram.com/index.php?/topic/154901-122-crew-light-an-automatic-light-manager-10-12-jan-2017/)
 
 
 
