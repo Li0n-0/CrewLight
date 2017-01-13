@@ -19,11 +19,11 @@ namespace CrewLight
 		public static bool onlyForControllable = false;
 		public static string morseCodeStr = "_._|...|.__.";
 		public static double distance = 200d;
-		public static float ditDuration = .9f;
-		public static float dahDuration = 2f;
-		public static float symbolSpaceDuration = 1f;
-		public static float letterSpaceDuration = 1.3f;
-		public static float wordSpaceDuration = 1.7f;
+		public static float ditDuration = 1.1f;
+		public static float dahDuration = 2.5f;
+		public static float symbolSpaceDuration = 1.1f;
+		public static float letterSpaceDuration = 1.7f;
+		public static float wordSpaceDuration = 2.5f;
 
 		// Sun Light :
 		public static bool useSunLight = true;
