@@ -32,7 +32,7 @@ namespace CrewLight
 		public static bool onlyNoAGpart = true;
 		public static bool useDepthLight = true;
 		public static double depthThreshold = 20d;
-		public static float delayLowTimeWarp = 1.5f;
+		public static float delayLowTimeWarp = 2f;
 		public static float delayHighTimeWarp = .1f;
 
 		// EVA Light :
@@ -180,7 +180,8 @@ namespace CrewLight
 			}
 			nodeSunLight.SetValue ("delay_in_low_timewarp", delayLowTimeWarp, 
 				"delay between check of the sun position when in physic timewrap, increase for better performance, " +
-				"lower for a quicker response of the lights", true);
+				"lower for a quicker response of the lights." +
+				"Is divided by the current warp-time speed", true);
 
 			if (nodeSunLight.HasValue ("delay_in_high_timewarp")) {
 				delayHighTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_high_timewarp"));

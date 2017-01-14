@@ -92,7 +92,7 @@ namespace CrewLight
 			while (true) {
 				SetLights ();
 				if (TimeWarp.CurrentRate < 5f) {
-					yield return new WaitForSeconds (CLSettings.delayLowTimeWarp);
+					yield return new WaitForSeconds (CLSettings.delayLowTimeWarp / TimeWarp.CurrentRate);
 				} else {
 					yield return new WaitForSeconds (CLSettings.delayHighTimeWarp);
 				}
