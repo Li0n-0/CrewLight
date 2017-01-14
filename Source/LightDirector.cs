@@ -10,9 +10,11 @@ namespace CrewLight
 		public void Start ()
 		{
 			// CrewLight :
-			GameEvents.onCrewTransferred.Add (CrewLightTransfer);
-			GameEvents.onVesselChange.Add (CrewLightVessel);
-			CrewLightVessel (FlightGlobals.ActiveVessel);
+			if (CLSettings.useTransferCrew) {
+				GameEvents.onCrewTransferred.Add (CrewLightTransfer);
+				GameEvents.onVesselChange.Add (CrewLightVessel);
+				CrewLightVessel (FlightGlobals.ActiveVessel);
+			}
 
 			// EVALight :
 			if (CLSettings.useSunLightEVA) {
@@ -35,8 +37,10 @@ namespace CrewLight
 		public void OnDestroy ()
 		{
 			// CrewLight :
-			GameEvents.onCrewTransferred.Remove (CrewLightTransfer);
-			GameEvents.onVesselChange.Remove (CrewLightVessel);
+			if (CLSettings.useTransferCrew) {
+				GameEvents.onCrewTransferred.Remove (CrewLightTransfer);
+				GameEvents.onVesselChange.Remove (CrewLightVessel);
+			}
 
 			// EVALight :
 			if (CLSettings.useSunLightEVA) {

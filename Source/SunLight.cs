@@ -91,7 +91,11 @@ namespace CrewLight
 
 			while (true) {
 				SetLights ();
-				yield return new WaitForSeconds (CLSettings.waitBetweenRay);
+				if (TimeWarp.CurrentRate < 5f) {
+					yield return new WaitForSeconds (CLSettings.delayLowTimeWarp / TimeWarp.CurrentRate);
+				} else {
+					yield return new WaitForSeconds (CLSettings.delayHighTimeWarp);
+				}
 			}
 		}
 
@@ -116,7 +120,7 @@ namespace CrewLight
 				}
 
 				// Check if part is uncrewed
-				if (part.CrewCapacity == 0) {
+				if (part.CrewCapacity == 0 || ! CLSettings.useTransferCrew) {
 
 					if (part.Modules.Contains<ModuleColorChanger> ()) {
 						ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();

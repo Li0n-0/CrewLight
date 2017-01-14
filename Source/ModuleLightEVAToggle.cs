@@ -6,24 +6,33 @@ namespace CrewLight
 {
 	public class ModuleLightEVAToggle : PartModule
 	{
-		private List<ModuleLight> moduleLight;
+		private List<Part> ogSymPart;
 
 		public override void OnStart (StartState state)
 		{
-			if (part.Modules.Contains<ModuleLight> ()) {
-				moduleLight = part.Modules.GetModules<ModuleLight> ();
+			if (part.Modules.Contains<ModuleLight> () && CLSettings.useVesselLightsOnEVA) {
+				ogSymPart = new List<Part> (part.symmetryCounterparts);
+			} else {
+				Destroy (this);
 			}
 		}
 
 		[KSPEvent (active = true, guiActiveUnfocused = true, externalToEVAOnly = true, guiName = "Toggle Light")]
 		public void LightToggleEVA ()
 		{
-			foreach (ModuleLight light in moduleLight) {
-				if (light.isOn) {
-					light.LightsOff ();
-				} else {
-					light.LightsOn ();
-				}
+			if (! CLSettings.lightSymLights) {
+				// Remove the symmetry counter parts before lightning, then add them back
+				part.symmetryCounterparts.Clear ();
+			}
+
+			if (part.Modules.GetModule<ModuleLight> ().isOn) {
+				part.SendMessage ("LightsOff");
+			} else {
+				part.SendMessage ("LightsOn");
+			}
+
+			if (! CLSettings.lightSymLights) {
+				part.symmetryCounterparts = ogSymPart;
 			}
 		}
 
