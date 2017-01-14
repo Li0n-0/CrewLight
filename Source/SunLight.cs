@@ -120,7 +120,7 @@ namespace CrewLight
 				}
 
 				// Check if part is uncrewed
-				if (part.CrewCapacity == 0) {
+				if (part.CrewCapacity == 0 || ! CLSettings.useTransferCrew) {
 
 					if (part.Modules.Contains<ModuleColorChanger> ()) {
 						ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();

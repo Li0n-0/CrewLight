@@ -12,6 +12,7 @@ namespace CrewLight
 		private static ConfigNode nodeEVALight;
 		private static ConfigNode nodeLightActionGroup;
 		private static ConfigNode nodeVesselLightsOnEVA;
+		private static ConfigNode nodeTransferCrew;
 
 		// Default settings :
 
@@ -46,6 +47,9 @@ namespace CrewLight
 		// Toggle vessel lights on EVA
 		public static bool useVesselLightsOnEVA = true;
 		public static bool lightSymLights = false;
+
+		// Transfer Crew
+		public static bool useTransferCrew = true;
 
 		// Internal :
 		public static List<int> morseCode;
@@ -85,6 +89,11 @@ namespace CrewLight
 				settingsNode.AddNode ("Toggle_Vessel_Lights_On_EVA");
 			}
 			nodeVesselLightsOnEVA = settingsNode.GetNode ("Toggle_Vessel_Lights_On_EVA");
+
+			if (! settingsNode.HasNode ("Crew_Light")) {
+				settingsNode.AddNode ("Crew_Light");
+			}
+			nodeTransferCrew = settingsNode.GetNode ("Crew_Light");
 
 			// Check for values in settings file
 			// Distant Vessel Morse Code
@@ -226,6 +235,14 @@ namespace CrewLight
 			}
 			nodeVesselLightsOnEVA.SetValue ("toggle_symmetric_lights", lightSymLights, 
 				"if true all symmetrical lights will respond to the toggle", true);
+			//
+			// Transfer Crew
+			//
+			if (nodeTransferCrew.HasValue ("use_cabin_crew_lightning")) {
+				useTransferCrew = bool.Parse (nodeTransferCrew.GetValue ("use_cabin_crew_lightning"));
+			}
+			nodeTransferCrew.SetValue ("use_cabin_crew_lightning", useTransferCrew, 
+				"kerbal turns the light on in their cabin/pod", true);
 			
 			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
 
