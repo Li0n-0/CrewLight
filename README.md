@@ -17,6 +17,11 @@
 ![GIF of Sunlight](http://i.imgur.com/hw9wEd8.gif)
 
 
+#### And to the depth
+
+GIF incoming...
+
+
 #### When approaching a distant vessel its lights will blink, sending you a welcoming message in Morse code
 
 ![GIF of MorseLight](http://i.imgur.com/YlwWKMr.gif)
@@ -26,6 +31,8 @@
 
 ![GIF of EVAToggleLight](http://i.imgur.com/DO9GwbO.gif)
 
+
+### [Youtube review by KottabosGames](https://youtu.be/AE1pvzh2q1Y)
 
 
 ### How does it works ?
