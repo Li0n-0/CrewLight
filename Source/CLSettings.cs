@@ -54,9 +54,181 @@ namespace CrewLight
 
 		static CLSettings ()
 		{
-			if (!LoadNodes()) {
-				Create ();
+			// Check for the settings file
+			settingsNode = ConfigNode.Load (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
+			if (settingsNode == null) {
+				settingsNode = new ConfigNode ();
 			}
+
+			// Check for nodes in settings file
+			if (! settingsNode.HasNode("Distant_Vessel_Morse_Code")) {
+				settingsNode.AddNode ("Distant_Vessel_Morse_Code");
+			}
+			nodeDistantVesselLight = settingsNode.GetNode ("Distant_Vessel_Morse_Code");
+
+			if (! settingsNode.HasNode("Sun_Light")) {
+				settingsNode.AddNode ("Sun_Light");
+			}
+			nodeSunLight = settingsNode.GetNode ("Sun_Light");
+
+			if (! settingsNode.HasNode("EVA_Light")) {
+				settingsNode.AddNode ("EVA_Light");
+			}
+			nodeEVALight = settingsNode.GetNode ("EVA_Light");
+
+			if (! settingsNode.HasNode("Light_Action_Group")) {
+				settingsNode.AddNode ("Light_Action_Group");
+			}
+			nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
+
+			if (! settingsNode.HasNode("Toggle_Vessel_Lights_On_EVA")) {
+				settingsNode.AddNode ("Toggle_Vessel_Lights_On_EVA");
+			}
+			nodeVesselLightsOnEVA = settingsNode.GetNode ("Toggle_Vessel_Lights_On_EVA");
+
+			// Check for values in settings file
+			// Distant Vessel Morse Code
+			//
+			if (nodeDistantVesselLight.HasValue ("use_morse_code")) {
+				useMorseCode = bool.Parse (nodeDistantVesselLight.GetValue ("use_morse_code"));
+			}
+			nodeDistantVesselLight.SetValue ("use_morse_code", useMorseCode, true);
+
+			if (nodeDistantVesselLight.HasValue ("only_for_controllable_vessel")) {
+				onlyForControllable = bool.Parse (nodeDistantVesselLight.GetValue ("only_for_controllable_vessel"));
+			}
+			nodeDistantVesselLight.SetValue ("only_for_controllable_vessel", onlyForControllable, true);
+
+			if (nodeDistantVesselLight.HasValue ("morse_code")) {
+				morseCodeStr = nodeDistantVesselLight.GetValue ("morse_code");
+			}
+			nodeDistantVesselLight.SetValue ("morse_code", morseCodeStr, 
+				"'.' for ti, '_' for taah, '|' for separate letters, ' ' for separate words", true);
+			
+			if (nodeDistantVesselLight.HasValue ("distance")) {
+				distance = Double.Parse (nodeDistantVesselLight.GetValue ("distance"));
+			}
+			nodeDistantVesselLight.SetValue ("distance", distance, 
+				"distance at which the message begin, in meter, maximum 2000", true);
+			
+			if (nodeDistantVesselLight.HasValue ("dit")) {
+				ditDuration = float.Parse (nodeDistantVesselLight.GetValue ("dit"));
+			}
+			nodeDistantVesselLight.SetValue("dit", ditDuration, 
+				"duration of the light for the dit (.), in seconds", true);
+			
+			if (nodeDistantVesselLight.HasValue ("dah")) {
+				dahDuration = float.Parse (nodeDistantVesselLight.GetValue ("dah"));
+			}
+			nodeDistantVesselLight.SetValue ("dah", dahDuration, 
+				"duration of the light for the dah (_), in seconds", true);
+			
+			if (nodeDistantVesselLight.HasValue ("symbol_space")) {
+				symbolSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("symbol_space"));
+			}
+			nodeDistantVesselLight.SetValue ("symbol_space", symbolSpaceDuration, 
+				"duration of the darkness between two symbol, in seconds", true);
+
+			if (nodeDistantVesselLight.HasValue ("letter_space")) {
+				letterSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("letter_space"));
+			}
+			nodeDistantVesselLight.SetValue ("letter_space", letterSpaceDuration, 
+				"duration of the darkness between two letters, '|', in seconds", true);
+
+			if (nodeDistantVesselLight.HasValue ("word_space")) {
+				wordSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("word_space"));
+			}
+			nodeDistantVesselLight.SetValue ("word_space", wordSpaceDuration, 
+				"duration of the darkness between two words, ' ', in seconds", true);
+			//
+			// Sun Light
+			//
+			if (nodeSunLight.HasValue ("use_sun_light")) {
+				useSunLight = bool.Parse (nodeSunLight.GetValue ("use_sun_light"));
+			}
+			nodeSunLight.SetValue("use_sun_light", useSunLight, 
+				"lights will go on/off as the sun rise/fall", true);
+
+			if (nodeSunLight.HasValue ("use_depth_light")) {
+				useDepthLight = bool.Parse (nodeSunLight.GetValue ("use_depth_light"));
+			}
+			nodeSunLight.SetValue ("use_depth_light", useDepthLight,
+				"lights will go on/off when the craft reach a certain depth", true);
+
+			if (nodeSunLight.HasValue ("depth_threshold")) {
+				depthThreshold = Double.Parse (nodeSunLight.GetValue ("depth_threshold"));
+			}
+			nodeSunLight.SetValue ("depth_threshold", depthThreshold, true);
+
+			if (nodeSunLight.HasValue ("only_light_not_in_AG")) {
+				onlyNoAGpart = bool.Parse (nodeSunLight.GetValue ("only_light_not_in_AG"));
+			}
+			nodeSunLight.SetValue ("only_light_not_in_AG", onlyNoAGpart,
+				"only lights not assigned to an Action Group will be lighted when the sun fall", true);
+
+			if (nodeSunLight.HasValue ("delay_in_low_timewarp")) {
+				delayLowTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_low_timewarp"));
+			}
+			nodeSunLight.SetValue ("delay_in_low_timewarp", delayLowTimeWarp, 
+				"delay between check of the sun position when in physic timewrap, increase for better performance, " +
+				"lower for a quicker response of the lights", true);
+
+			if (nodeSunLight.HasValue ("delay_in_high_timewarp")) {
+				delayHighTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_high_timewarp"));
+			}
+			nodeSunLight.SetValue ("delay_in_high_timewarp", delayHighTimeWarp, 
+				"delay between check of the sun position when in on-rail timewrap, increase for better performance, " +
+				"lower for a quicker response of the lights", true);
+			//
+			// EVA Light (helmet's lights)
+			//
+			if (nodeEVALight.HasValue ("use_sunlight_for_EVA")) {
+				useSunLight = bool.Parse (nodeEVALight.GetValue ("use_sunlight_for_EVA"));
+			}
+			nodeEVALight.SetValue ("use_sunlight_for_EVA", useSunLightEVA, 
+				"kerbal's headlights will go on/off as the sun rise/fall", true);
+
+			if (nodeEVALight.HasValue ("always_on_in_space")) {
+				onForEVASpace = bool.Parse (nodeEVALight.GetValue ("always_on_in_space"));
+			}
+			nodeEVALight.SetValue ("always_on_in_space", onForEVASpace, 
+				"always turn on the headlights when EVA in space", true);
+			
+			if (nodeEVALight.HasValue ("always_on_landed")) {
+				onForEVALanded = bool.Parse (nodeEVALight.GetValue ("always_on_landed"));
+			}
+			nodeEVALight.SetValue ("always_on_landed", onForEVALanded, 
+				"always turn on the headlights when EVA landed", true);
+			//
+			// Light Action Group
+			//
+			if (nodeLightActionGroup.HasValue ("disable_light_action_group_for_crew_part")) {
+				disableCrewAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_light_action_group_for_crew_part"));
+			}
+			nodeLightActionGroup.SetValue ("disable_light_action_group_for_crew_part", disableCrewAG, 
+				"remove crewable part from the Light Action Group", true);
+			
+			if (nodeLightActionGroup.HasValue ("disable_action_group_for_light_part")) {
+				disableAllAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_action_group_for_light_part"));
+			}
+			nodeLightActionGroup.SetValue ("disable_action_group_for_light_part", disableAllAG, 
+				"remove all the light part from the Light Action Group", true);
+			//
+			// Toggle Vessel Light On EVA
+			//
+			if (nodeVesselLightsOnEVA.HasValue ("enable_EVA_toggle_of_vessel_lights")) {
+				useVesselLightsOnEVA = bool.Parse (nodeVesselLightsOnEVA.GetValue ("enable_EVA_toggle_of_vessel_lights"));
+			}
+			nodeVesselLightsOnEVA.SetValue ("enable_EVA_toggle_of_vessel_lights", useVesselLightsOnEVA, true);
+
+			if (nodeVesselLightsOnEVA.HasValue ("toggle_symmetric_lights")) {
+				lightSymLights = bool.Parse (nodeVesselLightsOnEVA.GetValue ("toggle_symmetric_lights"));
+			}
+			nodeVesselLightsOnEVA.SetValue ("toggle_symmetric_lights", lightSymLights, 
+				"if true all symmetrical lights will respond to the toggle", true);
+			
+			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
+
 			ParseMorse ();
 		}
 
@@ -80,185 +252,6 @@ namespace CrewLight
 				}
 				morseCode.Add (4);
 			}
-		}
-
-		private static bool LoadNodes ()
-		{
-			settingsNode = ConfigNode.Load (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
-			if (settingsNode == null) {
-				return false;
-			}
-			if (settingsNode.HasNode("Distant_Vessel_Morse_Code")) {
-				nodeDistantVesselLight = settingsNode.GetNode ("Distant_Vessel_Morse_Code");
-			} else { return false; }
-			if (settingsNode.HasNode("Sun_Light")) {
-				nodeSunLight = settingsNode.GetNode ("Sun_Light");
-			} else { return false; }
-			if (settingsNode.HasNode("EVA_Light")) {
-				nodeEVALight = settingsNode.GetNode ("EVA_Light");
-			} else { return false; }
-			if (settingsNode.HasNode("Light_Action_Group")) {
-				nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
-			} else { return false; }
-			if (settingsNode.HasNode("Toggle_Vessel_Lights_On_EVA")) {
-				nodeVesselLightsOnEVA = settingsNode.GetNode ("Toggle_Vessel_Lights_On_EVA");
-			} else { return false; }
-
-			string[] paramMorseValue = new string[] {
-				"use_morse_code",
-				"only_for_controllable_vessel",
-				"morse_code",
-				"distance",
-				"dit",
-				"dah",
-				"symbol_space",
-				"letter_space",
-				"word_space"
-			};
-			string[] paramSunLightValue = new string[] {
-				"use_sun_light",
-				"use_depth_light",
-				"depth_threshold",
-				"only_light_not_in_AG",
-				"delay_in_low_timewarp",
-				"delay_in_high_timewarp"
-			};
-			string[] paramEVALight = new string[] {
-				"use_sunlight_for_EVA",
-				"always_on_in_space",
-				"always_on_landed"
-			};
-			string[] paramLightAGValue = new string[] {
-				"disable_light_action_group_for_crew_part",
-				"disable_action_group_for_light_part"
-			};
-			string[] paramVesselLightOnEVA = new string[] {
-				"enable_EVA_toggle_of_vessel_lights",
-				"toggle_symmetric_lights"
-			};
-
-			if (nodeDistantVesselLight.HasValues (paramMorseValue) 
-				&& nodeSunLight.HasValues (paramSunLightValue) 
-				&& nodeEVALight.HasValues (paramEVALight)
-				&& nodeLightActionGroup.HasValues (paramLightAGValue))
-			{
-				useMorseCode = bool.Parse (nodeDistantVesselLight.GetValue ("use_morse_code"));
-				onlyForControllable = bool.Parse (nodeDistantVesselLight.GetValue("only_for_controllable_vessel"));
-				morseCodeStr = nodeDistantVesselLight.GetValue ("morse_code");
-				distance = Double.Parse(nodeDistantVesselLight.GetValue ("distance"));
-				ditDuration = float.Parse (nodeDistantVesselLight.GetValue ("dit"));
-				dahDuration = float.Parse (nodeDistantVesselLight.GetValue ("dah"));
-				symbolSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("symbol_space"));
-				letterSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("letter_space"));
-				wordSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("word_space"));
-
-				useSunLight = bool.Parse (nodeSunLight.GetValue ("use_sun_light"));
-				useDepthLight = bool.Parse (nodeSunLight.GetValue ("use_depth_light"));
-				depthThreshold = Double.Parse (nodeSunLight.GetValue ("depth_threshold"));
-				onlyNoAGpart = bool.Parse (nodeSunLight.GetValue ("only_light_not_in_AG"));
-				delayLowTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_low_timewarp"));
-				delayHighTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_high_timewarp"));
-
-				useSunLightEVA = bool.Parse (nodeEVALight.GetValue ("use_sunlight_for_EVA"));
-				onForEVASpace = bool.Parse (nodeEVALight.GetValue ("always_on_in_space"));
-				onForEVALanded = bool.Parse (nodeEVALight.GetValue ("always_on_landed"));
-
-				disableCrewAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_light_action_group_for_crew_part"));
-				disableAllAG = bool.Parse (nodeLightActionGroup.GetValue("disable_action_group_for_light_part"));
-
-				useVesselLightsOnEVA = bool.Parse (nodeVesselLightsOnEVA.GetValue ("enable_EVA_toggle_of_vessel_lights"));
-				lightSymLights = bool.Parse (nodeVesselLightsOnEVA.GetValue ("toggle_symmetric_lights"));
-			} else { return false; }
-
-			return true;
-		}
-
-		private static void Create ()
-		{
-			settingsNode = new ConfigNode ();
-
-			settingsNode.AddNode ("Distant_Vessel_Morse_Code");
-			settingsNode.AddNode ("Sun_Light");
-			settingsNode.AddNode ("EVA_Light");
-			settingsNode.AddNode ("Light_Action_Group");
-			settingsNode.AddNode ("Toggle_Vessel_Lights_On_EVA");
-
-			ConfigNode nodeDistantVesselLight = settingsNode.GetNode ("Distant_Vessel_Morse_Code");
-			ConfigNode nodeSunLight = settingsNode.GetNode ("Sun_Light");
-			ConfigNode nodeEVALight = settingsNode.GetNode ("EVA_Light");
-			ConfigNode nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
-			ConfigNode nodeVesselLightsOnEVA = settingsNode.GetNode ("Toggle_Vessel_Lights_On_EVA");
-
-			// Distant Vessel :
-			nodeDistantVesselLight.AddValue ("use_morse_code", useMorseCode);
-
-			nodeDistantVesselLight.AddValue ("only_for_controllable_vessel", onlyForControllable);
-
-			nodeDistantVesselLight.AddValue ("morse_code", morseCodeStr, 
-				"'.' for ti, '_' for taah, '|' for separate letters, ' ' for separate words");
-			
-			nodeDistantVesselLight.AddValue ("distance", distance, 
-				"distance at which the message begin, in meter, maximum 2000");
-			
-			nodeDistantVesselLight.AddValue("dit", ditDuration, 
-				"duration of the light for the dit (.), in seconds");
-			
-			nodeDistantVesselLight.AddValue ("dah", dahDuration, 
-				"duration of the light for the dah (_), in seconds");
-			
-			nodeDistantVesselLight.AddValue ("symbol_space", symbolSpaceDuration, 
-				"duration of the darkness between two symbol, in seconds");
-			
-			nodeDistantVesselLight.AddValue ("letter_space", letterSpaceDuration, 
-				"duration of the darkness between two letters, '|', in seconds");
-			
-			nodeDistantVesselLight.AddValue ("word_space", wordSpaceDuration, 
-				"duration of the darkness between two words, ' ', in seconds");
-
-			// Sun Light :
-			nodeSunLight.AddValue("use_sun_light", useSunLight, 
-				"lights will go on/off as the sun rise/fall");
-
-			nodeSunLight.AddValue ("use_depth_light", useDepthLight,
-				"lights will go on/off when the craft reach a certain depth");
-
-			nodeSunLight.AddValue ("depth_threshold", depthThreshold);
-
-			nodeSunLight.AddValue ("only_light_not_in_AG", onlyNoAGpart,
-				"only lights not assigned to an Action Group will be lighted when the sun fall");
-
-			nodeSunLight.AddValue ("delay_in_low_timewarp", delayLowTimeWarp, 
-				"delay between check of the sun position when in physic timewrap, increase for better performance, " +
-				"lower for a quicker response of the lights");
-
-			nodeSunLight.AddValue ("delay_in_high_timewarp", delayHighTimeWarp, 
-				"delay between check of the sun position when in on-rail timewrap, increase for better performance, " +
-				"lower for a quicker response of the lights");
-
-			// EVA Light :
-			nodeEVALight.AddValue ("use_sunlight_for_EVA", useSunLightEVA, 
-				"kerbal's headlights will go on/off as the sun rise/fall");
-
-			nodeEVALight.AddValue ("always_on_in_space", onForEVASpace, 
-				"always turn on the headlights when EVA in space");
-
-			nodeEVALight.AddValue ("always_on_landed", onForEVALanded, 
-				"always turn on the headlights when EVA landed");
-
-			// Editor Light :
-			nodeLightActionGroup.AddValue ("disable_light_action_group_for_crew_part", disableCrewAG, 
-				"remove crewable part from the Light Action Group");
-
-			nodeLightActionGroup.AddValue ("disable_action_group_for_light_part", disableAllAG, 
-				"remove all the light part from the Light Action Group");
-
-			// Toggle Vessel Lights On EVA
-			nodeVesselLightsOnEVA.AddValue ("enable_EVA_toggle_of_vessel_lights", useVesselLightsOnEVA);
-
-			nodeVesselLightsOnEVA.AddValue ("toggle_symmetric_lights", lightSymLights, 
-				"if true all symmetrical lights will respond to the toggle");
-
-			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
 		}
 	}
 }
