@@ -35,7 +35,8 @@ namespace CrewLight
 		public static float delayLowTimeWarp = 2f;
 		public static float delayHighTimeWarp = .1f;
 		public static bool useStaggerdLight = true;
-		public static int lightPerStage = 4;
+		public static int maxLightPerStage = 6;
+		public static int minLightPerStage = 2;
 		public static float delayStage = 1.5f;
 		public static bool useRandomDelay = true;
 
@@ -200,10 +201,15 @@ namespace CrewLight
 			nodeSunLight.SetValue ("use_staggered_lightning", useStaggerdLight, "turn on the light in a staggered " +
 				"way, or all at the same time", true);
 
-			if (nodeSunLight.HasValue("light_per_stage")) {
-				lightPerStage = int.Parse (nodeSunLight.GetValue ("light_per_stage"));
+			if (nodeSunLight.HasValue ("max_light_per_stage")) {
+				maxLightPerStage = int.Parse (nodeSunLight.GetValue ("max_light_per_stage"));
 			}
-			nodeSunLight.SetValue ("light_per_stage", lightPerStage, "number of light per stage", true);
+			nodeSunLight.SetValue ("max_light_per_stage", maxLightPerStage, true);
+
+			if (nodeSunLight.HasValue ("min_light_per_stage")) {
+				minLightPerStage = int.Parse (nodeSunLight.GetValue ("min_light_per_stage"));
+			}
+			nodeSunLight.SetValue ("min_light_per_stage", minLightPerStage, true);
 
 			if (nodeSunLight.HasValue ("delay_between_stage")) {
 				delayStage = float.Parse (nodeSunLight.GetValue ("delay_between_stage"));
