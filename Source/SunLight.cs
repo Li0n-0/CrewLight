@@ -138,36 +138,6 @@ namespace CrewLight
 				}
 				slicedList.Add (stageList);
 			}
-
-//			if (CLSettings.rndLightPerStage) {
-//				bool keepGoing = true;
-//				while (keepGoing) {
-//					List<PartModule> stageList = new List<PartModule> ();
-//					if (workingList.Count > 10)
-//					int rndLight = UnityEngine.Random.Range (2, 10);
-//					for (int i = 0 ; i < rndLight; i++) {
-//						int randIndex = UnityEngine.Random.Range (0, workingList.Count);
-//						stageList.Add (workingList [randIndex]);
-//						workingList.RemoveAt (randIndex);
-//					}
-//					slicedList.Add (stageList);
-//				}
-//			} else {
-//				for (int i = 0 ; i < modulesLight.Count / CLSettings.lightPerStage ; i++) {
-//					List<PartModule> stageList = new List<PartModule> ();
-//					for (int ii = 0 ; ii < CLSettings.lightPerStage ; ii++) {
-//						int randIndex = UnityEngine.Random.Range (0, workingList.Count);
-//						stageList.Add (workingList [randIndex]);
-//						workingList.RemoveAt (randIndex);
-//					}
-//					slicedList.Add (stageList);
-//				}
-//				if (workingList.Count != 0) {
-//					slicedList.Add (workingList);
-//				}
-//			}
-
-
 			return slicedList;
 		}
 
