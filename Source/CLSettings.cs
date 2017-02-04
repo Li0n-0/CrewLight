@@ -34,6 +34,11 @@ namespace CrewLight
 		public static double depthThreshold = 20d;
 		public static float delayLowTimeWarp = 2f;
 		public static float delayHighTimeWarp = .1f;
+		public static bool useStaggerdLight = true;
+		public static int maxLightPerStage = 6;
+		public static int minLightPerStage = 2;
+		public static float delayStage = 1.5f;
+		public static bool useRandomDelay = true;
 
 		// EVA Light :
 		public static bool useSunLightEVA = true;
@@ -189,6 +194,33 @@ namespace CrewLight
 			nodeSunLight.SetValue ("delay_in_high_timewarp", delayHighTimeWarp, 
 				"delay between check of the sun position when in on-rail timewrap, increase for better performance, " +
 				"lower for a quicker response of the lights", true);
+
+			if (nodeSunLight.HasValue ("use_staggered_lightning")) {
+				useStaggerdLight = bool.Parse (nodeSunLight.GetValue ("use_staggered_lightning"));
+			}
+			nodeSunLight.SetValue ("use_staggered_lightning", useStaggerdLight, "turn on the light in a staggered " +
+				"way, or all at the same time", true);
+
+			if (nodeSunLight.HasValue ("max_light_per_stage")) {
+				maxLightPerStage = int.Parse (nodeSunLight.GetValue ("max_light_per_stage"));
+			}
+			nodeSunLight.SetValue ("max_light_per_stage", maxLightPerStage, true);
+
+			if (nodeSunLight.HasValue ("min_light_per_stage")) {
+				minLightPerStage = int.Parse (nodeSunLight.GetValue ("min_light_per_stage"));
+			}
+			nodeSunLight.SetValue ("min_light_per_stage", minLightPerStage, true);
+
+			if (nodeSunLight.HasValue ("delay_between_stage")) {
+				delayStage = float.Parse (nodeSunLight.GetValue ("delay_between_stage"));
+			}
+			nodeSunLight.SetValue ("delay_between_stage", delayStage, "in seconds", true);
+
+			if (nodeSunLight.HasValue ("use_a_random_delay")) {
+				useRandomDelay = bool.Parse (nodeSunLight.GetValue ("use_a_random_delay"));
+			}
+			nodeSunLight.SetValue ("use_a_random_dealy", useRandomDelay, "different between each stage, " +
+				"will overide the delay_between_stage above", true);
 			//
 			// EVA Light (helmet's lights)
 			//

@@ -63,30 +63,30 @@ namespace CrewLight
 				vesselDistance = GetDistance();
 			}
 
-			SwitchLight.AllLightsOff (modulesLight);
+			SwitchLight.Off (modulesLight);
 			yield return new WaitForSeconds (CLSettings.ditDuration);
 
 			// Morse message
 			foreach (int c in CLSettings.morseCode) {
 				switch (c) {
 				case 0:
-					SwitchLight.AllLightsOn (modulesLight);
+					SwitchLight.On (modulesLight);
 					yield return new WaitForSeconds (CLSettings.ditDuration);
 					break;
 				case 1:
-					SwitchLight.AllLightsOn (modulesLight);
+					SwitchLight.On (modulesLight);
 					yield return new WaitForSeconds (CLSettings.dahDuration);
 					break;
 				case 2:
-					SwitchLight.AllLightsOff (modulesLight);
+					SwitchLight.Off (modulesLight);
 					yield return new WaitForSeconds (CLSettings.letterSpaceDuration);
 					break;
 				case 3:
-					SwitchLight.AllLightsOff (modulesLight);
+					SwitchLight.Off (modulesLight);
 					yield return new WaitForSeconds (CLSettings.wordSpaceDuration);
 					break;
 				case 4:
-					SwitchLight.AllLightsOff (modulesLight);
+					SwitchLight.Off (modulesLight);
 					yield return new WaitForSeconds (CLSettings.symbolSpaceDuration);
 					break;
 				}

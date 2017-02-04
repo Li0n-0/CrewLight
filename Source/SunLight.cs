@@ -62,7 +62,11 @@ namespace CrewLight
 			if (CLSettings.useDepthLight) {
 				if (IsInDepth ()) {
 					if (!inDark) {
-						SwitchLight.AllLightsOn (modulesLight);
+						if (CLSettings.useSunLight) {
+							StartCoroutine ("StageLight");
+						} else {
+							SwitchLight.On (modulesLight);
+						}
 						inDark = true;
 					}
 					return;
@@ -72,12 +76,17 @@ namespace CrewLight
 			// Sun Lights :
 			if (IsSunShine ()) {
 				if (inDark) {
-					SwitchLight.AllLightsOff (modulesLight);
+					StopCoroutine ("StageLight");
+					SwitchLight.Off (modulesLight);
 					inDark = false;
 				}
 			} else {
 				if (!inDark) {
-					SwitchLight.AllLightsOn (modulesLight);
+					if (CLSettings.useStaggerdLight) {
+						StartCoroutine ("StageLight");
+					} else {
+						SwitchLight.On (modulesLight);
+					}
 					inDark = true;
 				}
 			}
@@ -97,6 +106,39 @@ namespace CrewLight
 					yield return new WaitForSeconds (CLSettings.delayHighTimeWarp);
 				}
 			}
+		}
+
+		private IEnumerator StageLight ()
+		{
+			foreach (List<PartModule> stageList in SliceLightList ()) {
+				SwitchLight.On (stageList);
+				if (CLSettings.useRandomDelay) {
+					yield return new WaitForSeconds (UnityEngine.Random.Range (.4f, 2f));
+				} else {
+					yield return new WaitForSeconds (CLSettings.delayStage);
+				}
+			}
+		}
+
+		private List<List<PartModule>> SliceLightList ()
+		{
+			List<List<PartModule>> slicedList = new List<List<PartModule>> ();
+			List<PartModule> workingList = new List<PartModule> (modulesLight);
+
+			while (workingList.Count != 0) {
+				List<PartModule> stageList = new List<PartModule> ();
+				int rndLightInStage = UnityEngine.Random.Range (CLSettings.minLightPerStage, CLSettings.maxLightPerStage);
+				if (rndLightInStage > workingList.Count) {
+					rndLightInStage = workingList.Count;
+				}
+				for (int i = 0 ; i < rndLightInStage ; i++) {
+					int randIndex = UnityEngine.Random.Range (0, workingList.Count);
+					stageList.Add (workingList [randIndex]);
+					workingList.RemoveAt (randIndex);
+				}
+				slicedList.Add (stageList);
+			}
+			return slicedList;
 		}
 
 		private IEnumerator FindLightPart ()
