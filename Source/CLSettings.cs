@@ -219,7 +219,7 @@ namespace CrewLight
 			if (nodeSunLight.HasValue ("use_a_random_delay")) {
 				useRandomDelay = bool.Parse (nodeSunLight.GetValue ("use_a_random_delay"));
 			}
-			nodeSunLight.SetValue ("use_a_random_dealy", useRandomDelay, "different between each stage, " +
+			nodeSunLight.SetValue ("use_a_random_delay", useRandomDelay, "different between each stage, " +
 				"will overide the delay_between_stage above", true);
 			//
 			// EVA Light (helmet's lights)
