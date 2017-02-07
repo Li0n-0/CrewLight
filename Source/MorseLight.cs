@@ -184,6 +184,14 @@ namespace CrewLight
 						}
 					}
 				}
+				if (part.Modules.Contains ("ModuleNavLight")) {
+					foreach (PartModule partM in part.Modules) {
+						if (partM.ClassName == "ModuleNavLight") {
+							modulesLight.Add (partM);
+							stateLight.Add (null);
+						}
+					}
+				}
 			}
 		}
 

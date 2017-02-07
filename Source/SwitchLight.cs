@@ -29,6 +29,54 @@ namespace CrewLight
 			case "WBILight":
 				light.SendMessage ("TurnOnLights");
 				break;
+			case "ModuleNavLight":
+				if (CLSettings.useAviationLightsEffect && CLSettings.inSunlight) {
+					switch (light.part.name) {
+					case "lightbeacon.amber":
+						light.SendMessage (AviationLightsParser (CLSettings.beaconAmber));
+						break;
+					case "lightbeacon.red":
+						light.SendMessage (AviationLightsParser (CLSettings.beaconRed));
+						break;
+					case "lightnav.blue":
+						light.SendMessage (AviationLightsParser (CLSettings.navBlue));
+						break;
+					case "lightnav.green":
+						light.SendMessage (AviationLightsParser (CLSettings.navGreen));
+						break;
+					case "lightnav.red":
+						light.SendMessage (AviationLightsParser (CLSettings.navRed));
+						break;
+					case "lightnav.white":
+						light.SendMessage (AviationLightsParser (CLSettings.navWhite));
+						break;
+					case "lightstrobe.white":
+						light.SendMessage (AviationLightsParser (CLSettings.strobeWhite));
+						break;
+					}
+				} else {
+					light.SendMessage ("LightOn");
+				}
+
+				break;
+			}
+		}
+
+		private static string AviationLightsParser (int i)
+		{
+			switch (i) {
+			case 0:
+				return "LightOff";
+			case 1:
+				return "LightFlash";
+			case 2:
+				return "LightDoubleFlash";
+			case 3:
+				return "LightInterval";
+			case 4:
+				return "LightOn";
+			default:
+				return "LightOn";
 			}
 		}
 
@@ -53,6 +101,9 @@ namespace CrewLight
 				break;
 			case "WBILight":
 				light.SendMessage ("TurnOffLights");
+				break;
+			case "ModuleNavLight":
+				light.SendMessage ("LightOff");
 				break;
 			}
 		}
