@@ -11,6 +11,7 @@ namespace CrewLight
 		{
 			switch (light.moduleName) {
 			case "ModuleColorChanger":
+			case "ModuleColorChangerConsumer":
 				if (! light.GetComponent<ModuleColorChanger> ().animState) {
 					light.SendMessage ("ToggleEvent");
 				}
@@ -22,6 +23,7 @@ namespace CrewLight
 				light.SendMessage ("LightsOn");
 				break;
 			case "ModuleAnimateGeneric":
+			case "ModuleAnimateGenericConsumer":
 				if (light.GetComponent<ModuleAnimateGeneric> ().animSwitch) {
 					light.SendMessage ("Toggle");
 				}
@@ -36,6 +38,7 @@ namespace CrewLight
 		{
 			switch (light.moduleName) {
 			case "ModuleColorChanger":
+			case "ModuleColorChangerConsumer":
 				if (light.GetComponent<ModuleColorChanger> ().animState) {
 					light.SendMessage ("ToggleEvent");
 				}
@@ -47,6 +50,7 @@ namespace CrewLight
 				light.SendMessage ("LightsOff");
 				break;
 			case "ModuleAnimateGeneric":
+			case "ModuleAnimateGenericConsumer":
 				if (! light.GetComponent<ModuleAnimateGeneric> ().animSwitch) {
 					light.SendMessage ("Toggle");
 				}
