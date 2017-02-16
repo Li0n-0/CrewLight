@@ -85,7 +85,9 @@ namespace CrewLight
 		private void CrewLightTransfer (GameEvents.HostedFromToAction<ProtoCrewMember, Part> eData)
 		{
 			SwitchLight.On (eData.to);
-			SwitchLight.Off (eData.from);
+			if (eData.from.protoModuleCrew.Count == 0) {
+				SwitchLight.Off (eData.from);
+			}
 		}
 			
 		#endregion
