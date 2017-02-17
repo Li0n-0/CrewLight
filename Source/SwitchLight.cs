@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Reflection;
 using UnityEngine;
 
 namespace CrewLight
@@ -11,72 +12,66 @@ namespace CrewLight
 		{
 			switch (light.moduleName) {
 			case "ModuleColorChanger":
-				if (! light.GetComponent<ModuleColorChanger> ().animState) {
-					light.SendMessage ("ToggleEvent");
+			case "ModuleColorChangerConsumer":
+				ModuleColorChanger castMCC = (ModuleColorChanger)light;
+				if (! castMCC.animState) {
+					castMCC.ToggleEvent ();
 				}
 				break;
 			case "ModuleLight":
 			case "ModuleStockLightColoredLens":
 			case "ModuleMultiPointSurfaceLight":
 			case "ModuleColoredLensLight":
-				light.SendMessage ("LightsOn");
+				ModuleLight castML = (ModuleLight)light;
+				castML.LightsOn ();
 				break;
 			case "ModuleAnimateGeneric":
-				if (light.GetComponent<ModuleAnimateGeneric> ().animSwitch) {
-					light.SendMessage ("Toggle");
+			case "ModuleAnimateGenericConsumer":
+				ModuleAnimateGeneric castMAG = (ModuleAnimateGeneric)light;
+				if (castMAG.animSwitch) {
+					castMAG.Toggle ();
 				}
 				break;
 			case "WBILight":
-				light.SendMessage ("TurnOnLights");
+				light.GetType ().InvokeMember ("TurnOnLights", BindingFlags.InvokeMethod, null, light, null);
 				break;
 			case "ModuleNavLight":
 				if (CLSettings.useAviationLightsEffect && CLSettings.inSunlight) {
 					switch (light.part.name) {
 					case "lightbeacon.amber":
-						light.SendMessage (AviationLightsParser (CLSettings.beaconAmber));
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { CLSettings.beaconAmber });
 						break;
 					case "lightbeacon.red":
-						light.SendMessage (AviationLightsParser (CLSettings.beaconRed));
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { CLSettings.beaconRed });
 						break;
 					case "lightnav.blue":
-						light.SendMessage (AviationLightsParser (CLSettings.navBlue));
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { CLSettings.navBlue });
 						break;
 					case "lightnav.green":
-						light.SendMessage (AviationLightsParser (CLSettings.navGreen));
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { CLSettings.navGreen });
 						break;
 					case "lightnav.red":
-						light.SendMessage (AviationLightsParser (CLSettings.navRed));
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { CLSettings.navRed });
 						break;
 					case "lightnav.white":
-						light.SendMessage (AviationLightsParser (CLSettings.navWhite));
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { CLSettings.navWhite });
 						break;
 					case "lightstrobe.white":
-						light.SendMessage (AviationLightsParser (CLSettings.strobeWhite));
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { CLSettings.strobeWhite });
 						break;
 					}
 				} else {
-					light.SendMessage ("LightOn");
+					light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, new object[] {4});
 				}
 
 				break;
-			}
-		}
-
-		private static string AviationLightsParser (int i)
-		{
-			switch (i) {
-			case 0:
-				return "LightOff";
-			case 1:
-				return "LightFlash";
-			case 2:
-				return "LightDoubleFlash";
-			case 3:
-				return "LightInterval";
-			case 4:
-				return "LightOn";
-			default:
-				return "LightOn";
 			}
 		}
 
@@ -84,26 +79,29 @@ namespace CrewLight
 		{
 			switch (light.moduleName) {
 			case "ModuleColorChanger":
-				if (light.GetComponent<ModuleColorChanger> ().animState) {
-					light.SendMessage ("ToggleEvent");
+			case "ModuleColorChangerConsumer":
+				ModuleColorChanger castMCC = (ModuleColorChanger)light;
+				if (castMCC.animState) {
+					castMCC.ToggleEvent ();
 				}
 				break;
 			case "ModuleLight":
 			case "ModuleStockLightColoredLens":
 			case "ModuleMultiPointSurfaceLight":
 			case "ModuleColoredLensLight":
-				light.SendMessage ("LightsOff");
+				ModuleLight castML = (ModuleLight)light;
+				castML.LightsOff ();
 				break;
 			case "ModuleAnimateGeneric":
-				if (! light.GetComponent<ModuleAnimateGeneric> ().animSwitch) {
-					light.SendMessage ("Toggle");
-				}
+			case "ModuleAnumateGenericConsumer":
+				ModuleAnimateGeneric castMAG = (ModuleAnimateGeneric)light;
+				castMAG.Toggle ();
 				break;
 			case "WBILight":
-				light.SendMessage ("TurnOffLights");
+				light.GetType ().InvokeMember ("TurnOffLights", BindingFlags.InvokeMethod, null, light, null);
 				break;
 			case "ModuleNavLight":
-				light.SendMessage ("LightOff");
+				light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, new object[] {0});
 				break;
 			}
 		}
