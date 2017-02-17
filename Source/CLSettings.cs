@@ -13,6 +13,7 @@ namespace CrewLight
 		private static ConfigNode nodeLightActionGroup;
 		private static ConfigNode nodeVesselLightsOnEVA;
 		private static ConfigNode nodeTransferCrew;
+		private static ConfigNode nodeAviationLights;
 
 		// Default settings :
 
@@ -56,6 +57,19 @@ namespace CrewLight
 		// Transfer Crew
 		public static bool useTransferCrew = true;
 
+		// Aviation Light :
+		public static bool useAviationLightsEffect = true;
+		public static bool beaconOnEngine = true;
+		public static int beaconAmber = 1;
+		public static int beaconRed = 1;
+		public static int navBlue = 4;
+		public static int navGreen = 4;
+		public static int navRed = 4;
+		public static int navWhite = 4;
+		public static int strobeWhite = 2;
+		// not exposed :
+		public static bool  inSunlight = true;
+
 		// Internal :
 		public static List<int> morseCode;
 		public static int layerMask = (1 << 10 | 1 << 15); // Scaled & Local Scenery layer
@@ -63,6 +77,7 @@ namespace CrewLight
 
 		static CLSettings ()
 		{
+			#region EnhanceReadability
 			// Check for the settings file
 			settingsNode = ConfigNode.Load (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
 			if (settingsNode == null) {
@@ -99,6 +114,11 @@ namespace CrewLight
 				settingsNode.AddNode ("Crew_Light");
 			}
 			nodeTransferCrew = settingsNode.GetNode ("Crew_Light");
+
+			if (! settingsNode.HasNode ("Aviation_Lights")) {
+				settingsNode.AddNode ("Aviation_Lights", "enhanced behavior for the lights from the mod Aviation Lights");
+			}
+			nodeAviationLights = settingsNode.GetNode ("Aviation_Lights");
 
 			// Check for values in settings file
 			// Distant Vessel Morse Code
@@ -219,7 +239,7 @@ namespace CrewLight
 			if (nodeSunLight.HasValue ("use_a_random_delay")) {
 				useRandomDelay = bool.Parse (nodeSunLight.GetValue ("use_a_random_delay"));
 			}
-			nodeSunLight.SetValue ("use_a_random_dealy", useRandomDelay, "different between each stage, " +
+			nodeSunLight.SetValue ("use_a_random_delay", useRandomDelay, "different between each stage, " +
 				"will overide the delay_between_stage above", true);
 			//
 			// EVA Light (helmet's lights)
@@ -262,7 +282,7 @@ namespace CrewLight
 				useVesselLightsOnEVA = bool.Parse (nodeVesselLightsOnEVA.GetValue ("enable_EVA_toggle_of_vessel_lights"));
 			}
 			nodeVesselLightsOnEVA.SetValue ("enable_EVA_toggle_of_vessel_lights", useVesselLightsOnEVA, true);
-
+			#endregion
 			if (nodeVesselLightsOnEVA.HasValue ("toggle_symmetric_lights")) {
 				lightSymLights = bool.Parse (nodeVesselLightsOnEVA.GetValue ("toggle_symmetric_lights"));
 			}
@@ -276,7 +296,62 @@ namespace CrewLight
 			}
 			nodeTransferCrew.SetValue ("use_cabin_crew_lightning", useTransferCrew, 
 				"kerbal turns the light on in their cabin/pod", true);
-			
+			//
+			// Aviation Lights
+			//
+			if (nodeAviationLights.HasValue ("use_aviation_lights_effects")) {
+				useAviationLightsEffect = bool.Parse (nodeAviationLights.GetValue ("use_aviation_lights_effects"));
+			}
+			nodeAviationLights.SetValue ("use_aviation_lights_effects", useAviationLightsEffect, true);
+
+			if (nodeAviationLights.HasValue ("turn_on_beacon_light_with_engine")) {
+				beaconOnEngine = bool.Parse (nodeAviationLights.GetValue ("turn_on_beacon_light_with_engine"));
+			}
+			nodeAviationLights.SetValue ("turn_on_beacon_light_with_engine", beaconOnEngine, 
+				"beacon light will go only when you push the throttle", true);
+
+			if (nodeAviationLights.HasValue ("beacon_amber")) {
+				beaconAmber = int.Parse (nodeAviationLights.GetValue ("beacon_amber"));
+			}
+			nodeAviationLights.SetValue ("beacon_amber", beaconAmber, 
+				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
+
+			if (nodeAviationLights.HasValue ("beacon_red")) {
+				beaconRed = int.Parse (nodeAviationLights.GetValue ("beacon_red"));
+			}
+			nodeAviationLights.SetValue ("beacon_red", beaconRed, 
+				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
+
+			if (nodeAviationLights.HasValue ("nav_blue")) {
+				navBlue = int.Parse (nodeAviationLights.GetValue ("nav_blue"));
+			}
+			nodeAviationLights.SetValue ("nav_blue", navBlue, 
+				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
+
+			if (nodeAviationLights.HasValue ("nav_green")) {
+				navGreen = int.Parse (nodeAviationLights.GetValue ("nav_green"));
+			}
+			nodeAviationLights.SetValue ("nav_green", navGreen, 
+				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
+
+			if (nodeAviationLights.HasValue ("nav_red")) {
+				navRed = int.Parse (nodeAviationLights.GetValue ("nav_red"));
+			}
+			nodeAviationLights.SetValue ("nav_red", navRed, 
+				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
+
+			if (nodeAviationLights.HasValue ("nav_white")) {
+				navWhite = int.Parse (nodeAviationLights.GetValue ("nav_white"));
+			}
+			nodeAviationLights.SetValue ("nav_white", navWhite, 
+				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
+
+			if (nodeAviationLights.HasValue ("strobe_white")) {
+				strobeWhite = int.Parse (nodeAviationLights.GetValue ("strobe_white"));
+			}
+			nodeAviationLights.SetValue ("strobe_white", strobeWhite, 
+				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
+
 			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
 
 			ParseMorse ();

@@ -25,10 +25,13 @@ namespace CrewLight
 				part.symmetryCounterparts.Clear ();
 			}
 
-			if (part.Modules.GetModule<ModuleLight> ().isOn) {
-				part.SendMessage ("LightsOff");
-			} else {
-				part.SendMessage ("LightsOn");
+			List<ModuleLight> lights = part.Modules.GetModules<ModuleLight> ();
+			foreach (ModuleLight light in lights) {
+				if (light.isOn) {
+					SwitchLight.Off (light);
+				} else {
+					SwitchLight.On (light);
+				}
 			}
 
 			if (! CLSettings.lightSymLights) {

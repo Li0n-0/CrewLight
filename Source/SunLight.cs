@@ -213,6 +213,22 @@ namespace CrewLight
 							}
 						}
 					}
+					if (part.Modules.Contains("ModuleNavLight")) {
+						foreach (PartModule partM in part.Modules) {
+							if (partM.ClassName == "ModuleNavLight") {
+								if (! CLSettings.beaconOnEngine 
+								    || (part.name != "lightbeacon.amber" && part.name != "lightbeacon.red")) {
+									if (CLSettings.onlyNoAGpart) {
+										if (!partM.Actions.Contains(KSPActionGroup.Light)) {
+											modulesLight.Add (partM);
+										}
+									} else {
+										modulesLight.Add (partM);
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
