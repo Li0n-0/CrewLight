@@ -5,7 +5,11 @@
     "VERSION":
     {
         "MAJOR":1,
+<<<<<<< HEAD
         "MINOR":4,
+=======
+        "MINOR":3,
+>>>>>>> master
         "PATCH":0,
         "BUILD":0
     },

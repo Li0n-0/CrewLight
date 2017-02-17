@@ -13,9 +13,14 @@ namespace CrewLight
 			switch (light.moduleName) {
 			case "ModuleColorChanger":
 			case "ModuleColorChangerConsumer":
+<<<<<<< HEAD
 				ModuleColorChanger castMCC = (ModuleColorChanger)light;
 				if (! castMCC.animState) {
 					castMCC.ToggleEvent ();
+=======
+				if (! light.GetComponent<ModuleColorChanger> ().animState) {
+					light.SendMessage ("ToggleEvent");
+>>>>>>> master
 				}
 				break;
 			case "ModuleLight":
@@ -27,9 +32,14 @@ namespace CrewLight
 				break;
 			case "ModuleAnimateGeneric":
 			case "ModuleAnimateGenericConsumer":
+<<<<<<< HEAD
 				ModuleAnimateGeneric castMAG = (ModuleAnimateGeneric)light;
 				if (castMAG.animSwitch) {
 					castMAG.Toggle ();
+=======
+				if (light.GetComponent<ModuleAnimateGeneric> ().animSwitch) {
+					light.SendMessage ("Toggle");
+>>>>>>> master
 				}
 				break;
 			case "WBILight":
@@ -80,9 +90,14 @@ namespace CrewLight
 			switch (light.moduleName) {
 			case "ModuleColorChanger":
 			case "ModuleColorChangerConsumer":
+<<<<<<< HEAD
 				ModuleColorChanger castMCC = (ModuleColorChanger)light;
 				if (castMCC.animState) {
 					castMCC.ToggleEvent ();
+=======
+				if (light.GetComponent<ModuleColorChanger> ().animState) {
+					light.SendMessage ("ToggleEvent");
+>>>>>>> master
 				}
 				break;
 			case "ModuleLight":
@@ -93,9 +108,16 @@ namespace CrewLight
 				castML.LightsOff ();
 				break;
 			case "ModuleAnimateGeneric":
+<<<<<<< HEAD
 			case "ModuleAnumateGenericConsumer":
 				ModuleAnimateGeneric castMAG = (ModuleAnimateGeneric)light;
 				castMAG.Toggle ();
+=======
+			case "ModuleAnimateGenericConsumer":
+				if (! light.GetComponent<ModuleAnimateGeneric> ().animSwitch) {
+					light.SendMessage ("Toggle");
+				}
+>>>>>>> master
 				break;
 			case "WBILight":
 				light.GetType ().InvokeMember ("TurnOffLights", BindingFlags.InvokeMethod, null, light, null);
