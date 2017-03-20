@@ -41,4 +41,5 @@
 # KSP stuff
 *.log
 PartDatabase.cfg
+KSP/
 
