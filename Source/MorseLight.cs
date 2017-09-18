@@ -192,6 +192,14 @@ namespace CrewLight
 						}
 					}
 				}
+				if (part.Modules.Contains ("ModuleKELight")) {
+					foreach (PartModule partM in part.Modules) {
+						if (partM.ClassName == "ModuleKELight") {
+							modulesLight.Add (partM);
+							stateLight.Add ((bool)partM.GetType ().InvokeMember ("isOn", System.Reflection.BindingFlags.GetField, null, partM, null));
+						}
+					}
+				}
 			}
 		}
 

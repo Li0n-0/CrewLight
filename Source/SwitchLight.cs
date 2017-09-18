@@ -70,7 +70,9 @@ namespace CrewLight
 				} else {
 					light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, new object[] {4});
 				}
-
+				break;
+			case "ModuleKELight":
+				light.GetType ().InvokeMember ("LightsOn", BindingFlags.InvokeMethod, null, light, null);
 				break;
 			}
 		}
@@ -102,6 +104,9 @@ namespace CrewLight
 				break;
 			case "ModuleNavLight":
 				light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, new object[] {0});
+				break;
+			case "ModuleKELight":
+				light.GetType ().InvokeMember ("LightsOff", BindingFlags.InvokeMethod, null, light, null);
 				break;
 			}
 		}
@@ -156,6 +161,14 @@ namespace CrewLight
 			if (part.Modules.Contains ("WBILight")) {
 				foreach (PartModule module in part.Modules) {
 					if (module.moduleName == "WBILight") {
+						lightList.Add (module);
+					}
+				}
+			}
+			// Kerbal Electric Lights
+			if (part.Modules.Contains ("ModuleKELight")) {
+				foreach (PartModule module in part.Modules) {
+					if (module.moduleName == "ModuleKELight") {
 						lightList.Add (module);
 					}
 				}
