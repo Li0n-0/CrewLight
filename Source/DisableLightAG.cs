@@ -29,7 +29,7 @@ namespace CrewLight
 		void CheckForLight (ConstructionEventType constrE, Part part)
 		{
 			if (constrE == ConstructionEventType.PartCreated) {
-				if (disableCrewAG) {
+				if (disableCrewAG && !disableAllAG) {
 					if (part.CrewCapacity < 1) { return; }
 				}
 				if (part.Modules.Contains<ModuleColorChanger> () 
