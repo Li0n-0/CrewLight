@@ -10,7 +10,7 @@ namespace CrewLight
 
 		public override void OnStart (StartState state)
 		{
-			if (part.Modules.Contains<ModuleLight> () && CLSettings.useVesselLightsOnEVA) {
+			if ((part.Modules.Contains<ModuleLight> () || part.Modules.Contains ("ModuleKELight")) && CLSettings.useVesselLightsOnEVA) {
 				ogSymPart = new List<Part> (part.symmetryCounterparts);
 			} else {
 				Destroy (this);
@@ -25,12 +25,25 @@ namespace CrewLight
 				part.symmetryCounterparts.Clear ();
 			}
 
-			List<ModuleLight> lights = part.Modules.GetModules<ModuleLight> ();
-			foreach (ModuleLight light in lights) {
-				if (light.isOn) {
-					SwitchLight.Off (light);
-				} else {
-					SwitchLight.On (light);
+			if (part.Modules.Contains<ModuleLight> ()) {
+				List<ModuleLight> lights = part.Modules.GetModules<ModuleLight> ();
+				foreach (ModuleLight light in lights) {
+					if (light.isOn) {
+						SwitchLight.Off (light);
+					} else {
+						SwitchLight.On (light);
+					}
+				}
+			}
+			if (part.Modules.Contains ("ModuleKELight")) {
+				foreach (PartModule partM in part.Modules) {
+					if (partM.ClassName == "ModuleKELight") {
+						if ((bool)partM.GetType ().InvokeMember ("isOn", System.Reflection.BindingFlags.GetField, null, partM, null)) {
+							SwitchLight.Off (part);
+						} else {
+							SwitchLight.On (part);
+						}
+					}
 				}
 			}
 
