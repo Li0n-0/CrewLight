@@ -153,7 +153,8 @@ namespace CrewLight
 			}
 			if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
 				foreach (ModuleAnimateGeneric module in part.Modules.GetModules<ModuleAnimateGeneric> ()) {
-					if (Regex.IsMatch(module.actionGUIName, "light", RegexOptions.IgnoreCase)) {
+					if (Regex.IsMatch(module.actionGUIName, "light", RegexOptions.IgnoreCase) 
+						|| Regex.IsMatch(module.startEventGUIName, "light", RegexOptions.IgnoreCase)) {
 						lightList.Add (module);
 					}
 				}
