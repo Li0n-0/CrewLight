@@ -66,6 +66,10 @@ namespace CrewLight
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
 							new object[] { CLSettings.strobeWhite });
 						break;
+					default:
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { 4 });
+						break;
 					}
 				} else {
 					light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, new object[] {4});
