@@ -66,6 +66,10 @@ namespace CrewLight
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
 							new object[] { CLSettings.strobeWhite });
 						break;
+					default:
+						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
+							new object[] { 4 });
+						break;
 					}
 				} else {
 					light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, new object[] {4});
@@ -159,9 +163,18 @@ namespace CrewLight
 					}
 				}
 			}
+			// Wild Blue Industry
 			if (part.Modules.Contains ("WBILight")) {
 				foreach (PartModule module in part.Modules) {
 					if (module.moduleName == "WBILight") {
+						lightList.Add (module);
+					}
+				}
+			}
+			// AviationLights
+			if (part.Modules.Contains ("ModuleNavLight")) {
+				foreach (PartModule module in part.Modules) {
+					if (module.moduleName == "ModuleNavLight") {
 						lightList.Add (module);
 					}
 				}
