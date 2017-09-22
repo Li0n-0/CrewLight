@@ -53,6 +53,7 @@ namespace CrewLight
 		// Toggle vessel lights on EVA
 		public static bool useVesselLightsOnEVA = true;
 		public static bool lightSymLights = false;
+		public static bool onAviationLights = true;
 
 		// Transfer Crew
 		public static bool useTransferCrew = true;
@@ -288,6 +289,12 @@ namespace CrewLight
 			}
 			nodeVesselLightsOnEVA.SetValue ("toggle_symmetric_lights", lightSymLights, 
 				"if true all symmetrical lights will respond to the toggle", true);
+			
+			if (nodeVesselLightsOnEVA.HasValue ("enable_on_AviationLights_light")) {
+				onAviationLights = bool.Parse (nodeVesselLightsOnEVA.GetValue ("enable_on_AviationLights_light"));
+			}
+			nodeVesselLightsOnEVA.SetValue ("enable_on_AviationLights_lights", onAviationLights, 
+				"AviationLights lights will use the preset defined below", true);
 			//
 			// Transfer Crew
 			//
