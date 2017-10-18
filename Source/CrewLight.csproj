@@ -13,7 +13,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\GitHub\CrewLight\GameData\CrewLight</OutputPath>
+    <OutputPath>..\GameData\CrewLight</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -22,7 +22,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\GitHub\CrewLight\GameData\CrewLight</OutputPath>
+    <OutputPath>..\GameData\CrewLight</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -30,41 +30,28 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\GitHub\CrewLight\KSP\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>F:\program\KSP\KSP1.2.2Clean\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\GitHub\CrewLight\KSP\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>F:\program\KSP\KSP1.2.2Clean\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\GitHub\CrewLight\KSP\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>F:\program\KSP\KSP1.2.2Clean\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\..\GitHub\CrewLight\Source\DisableLightAG.cs">
-      <Link>DisableLightAG.cs</Link>
-    </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\Source\SwitchLight.cs">
-      <Link>SwitchLight.cs</Link>
-    </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\Source\CLSettings.cs">
-      <Link>CLSettings.cs</Link>
-    </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\Source\LightDirector.cs">
-      <Link>LightDirector.cs</Link>
-    </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\Source\SunLight.cs">
-      <Link>SunLight.cs</Link>
-    </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\Source\MorseLight.cs">
-      <Link>MorseLight.cs</Link>
-    </Compile>
-    <Compile Include="..\..\GitHub\CrewLight\Source\ModuleLightEVAToggle.cs">
-      <Link>ModuleLightEVAToggle.cs</Link>
-    </Compile>
+    <Compile Include="CLSettings.cs" />
+    <Compile Include="DisableLightAG.cs" />
+    <Compile Include="LightDirector.cs" />
+    <Compile Include="ModuleBeaconLightEngine.cs" />
+    <Compile Include="ModuleLightEVAToggle.cs" />
+    <Compile Include="MorseLight.cs" />
+    <Compile Include="SunLight.cs" />
+    <Compile Include="SwitchLight.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

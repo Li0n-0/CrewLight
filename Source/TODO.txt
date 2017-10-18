@@ -1,8 +1,0 @@
-* Refactor Lighter class so all method takes a PartModule
-
-* Transfer the settings to the stock settings in-game screen
-
-* When a part is removed from the ship try to access it and remove it from closeVesselLightModule instead
-	of rebuilding the entire list, only rebuild the list for staging event
-	
-* When AGX not installed add a right click menu button to add/remove light from the Light action group
