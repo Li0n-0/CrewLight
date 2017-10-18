@@ -8,7 +8,7 @@ namespace CrewLight
 		private PartModule navLight;
 		private bool isOn = false;
 
-		public void Start ()
+		public override void OnStart (StartState state)
 		{
 			if (! HighLogic.LoadedSceneIsFlight || ! CLSettings.beaconOnEngine) {
 				Destroy (this);
