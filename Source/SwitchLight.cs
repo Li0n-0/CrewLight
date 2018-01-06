@@ -139,7 +139,7 @@ namespace CrewLight
 			}
 		}
 
-		private static List<PartModule> GetLightModule (Part part)
+		public static List<PartModule> GetLightModule (Part part)
 		{
 			List<PartModule> lightList = new List<PartModule> ();
 
@@ -189,6 +189,53 @@ namespace CrewLight
 			}
 
 			return lightList;
+		}
+
+		public static bool IsOn (Part part)
+		{
+			return IsOn (GetLightModule (part));
+		}
+
+		public static bool IsOn (List<PartModule> modulesLight)
+		{
+			// not that usefull but needed for IsOn(Part)
+			return IsOn (modulesLight[0]);
+		}
+
+		public static bool IsOn (PartModule light)
+		{
+			switch (light.moduleName) {
+			case "ModuleColorChanger":
+			case "ModuleColorChangerConsumer":
+				ModuleColorChanger castMCC = (ModuleColorChanger)light;
+				return castMCC.animState;
+
+			case "ModuleLight":
+			case "ModuleStockLightColoredLens":
+			case "ModuleMultiPointSurfaceLight":
+			case "ModuleColoredLensLight":
+				ModuleLight castML = (ModuleLight)light;
+				return castML.isOn;
+
+			case "ModuleAnimateGeneric":
+			case "ModuleAnumateGenericConsumer":
+				ModuleAnimateGeneric castMAG = (ModuleAnimateGeneric)light;
+				return !castMAG.animSwitch;
+
+			case "WBILight":
+				return (bool)light.GetType ().InvokeMember ("isDeployed", BindingFlags.GetField, null, light, null);
+
+			case "ModuleNavLight":
+				if ((int)light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.GetField, null, light, null) != 0) {
+					return true;
+				} else { return false; }
+					
+			case "ModuleKELight":
+				return (bool)light.GetType ().InvokeMember ("isOn", BindingFlags.GetField, null, light, null);
+			
+			default:
+				return false;
+			}
 		}
 
 		private static void D (String str)

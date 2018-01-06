@@ -14,6 +14,7 @@ namespace CrewLight
 		private static ConfigNode nodeVesselLightsOnEVA;
 		private static ConfigNode nodeTransferCrew;
 		private static ConfigNode nodeAviationLights;
+		private static ConfigNode nodeMotionDetector;
 
 		// Default settings :
 
@@ -71,6 +72,9 @@ namespace CrewLight
 		// not exposed :
 		public static bool  inSunlight = true;
 
+		// Motion Detector Light :
+		public static bool useMotionDetector = true;
+
 		// Internal :
 		public static List<int> morseCode;
 		public static int layerMask = (1 << 10 | 1 << 15); // Scaled & Local Scenery layer
@@ -120,6 +124,11 @@ namespace CrewLight
 				settingsNode.AddNode ("Aviation_Lights", "enhanced behavior for the lights from the mod Aviation Lights");
 			}
 			nodeAviationLights = settingsNode.GetNode ("Aviation_Lights");
+
+			if (! settingsNode.HasNode ("Motion_Detector_Light")) {
+				settingsNode.AddNode ("Motion_Detector_Light");
+			}
+			nodeMotionDetector = settingsNode.GetNode ("Motion_Detector_Light");
 
 			// Check for values in settings file
 			// Distant Vessel Morse Code
@@ -358,6 +367,14 @@ namespace CrewLight
 			}
 			nodeAviationLights.SetValue ("strobe_white", strobeWhite, 
 				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
+			//
+			// Motion Detector Light
+			//
+			if (nodeMotionDetector.HasValue ("use_motion_detector_light")) {
+				useMotionDetector = bool.Parse (nodeMotionDetector.GetValue ("use_motion_detector_light"));
+			}
+			nodeMotionDetector.SetValue ("use_motion_detector_light", useMotionDetector, 
+				"enable the feature, lights must be set individualy, in flight or in the editor", true);
 
 			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
 

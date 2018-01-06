@@ -52,6 +52,7 @@
     <Compile Include="MorseLight.cs" />
     <Compile Include="SunLight.cs" />
     <Compile Include="SwitchLight.cs" />
+    <Compile Include="ModuleMotionDetector.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
