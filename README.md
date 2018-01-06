@@ -32,6 +32,13 @@ GIF incoming...
 ![GIF of EVAToggleLight](http://i.imgur.com/DO9GwbO.gif)
 
 
+#### Lights can have a motion detector set up
+
+![GIF of MotionDetectorLight](https://i.imgur.com/M0n02ZM.gif)
+
+![GIF of GUI MotionDetectorLight](https://i.imgur.com/MmYwl2Y.gif)
+
+
 ### [Youtube review by KottabosGames](https://youtu.be/AE1pvzh2q1Y)
 
 
@@ -65,6 +72,7 @@ There is a file `Settings.cfg` in `Kerbal Space Program/GameData/CrewLight/Plugi
 ### Know issues :
 
 Lights on kerbal's helmet don't turn on/off as the sun rises/falls. Lights will be turned on if the kerbal disembark in the dark but status of the sunlight won't be checked after that.
+The range sphere of the Motion Detector is offset from the light position only for the stock light, for others the sphere center is at the light position.
 
 
 ### What to do if it doesn't work ?
