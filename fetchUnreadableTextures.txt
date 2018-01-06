@@ -1,0 +1,31 @@
+private Texture2D GetUnreadableTexture (Texture2D texture)
+		{
+			// From : https://support.unity3d.com/hc/en-us/articles/206486626-How-can-I-get-pixels-from-unreadable-textures-
+			// Create a temporary RenderTexture of the same size as the texture
+			RenderTexture tempTex = RenderTexture.GetTemporary (texture.width, texture.height);
+
+			// Blit the pixels on texture to the RenderTexture
+			Graphics.Blit (texture, tempTex);
+
+			// Backup the currently set RenderTexture
+			RenderTexture previousTex = RenderTexture.active;
+
+			// Set the current RenderTexture to the temporary one we created
+			RenderTexture.active = tempTex;
+
+			// Create a new readable Texture2D to copy the pixels to it
+			Texture2D newTexture = new Texture2D (texture.width, texture.height);
+
+			// Copy the pixels from the RenderTexture to the new Texture
+			newTexture.ReadPixels (new Rect (0, 0, tempTex.width, tempTex.height), 0, 0);
+			newTexture.Apply ();
+
+			// Reset the active RenderTexture
+			RenderTexture.active = previousTex;
+
+			// Release the temporary RenderTexture
+			RenderTexture.ReleaseTemporary (tempTex);
+
+			// "newTexture" now has the same pixels from "texture" and it's readable.
+			return newTexture;
+		}
