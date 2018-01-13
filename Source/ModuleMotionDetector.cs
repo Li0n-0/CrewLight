@@ -290,7 +290,7 @@ namespace CrewLight
 				// Input Lock :
 				if (windowRect.Contains (Mouse.screenPos)) {
 					InputLockManager.SetControlLock (
-						ControlTypes.UI | ControlTypes.EDITOR_PAD_PICK_PLACE, "CrewLight_InputLock");
+						ControlTypes.UI | ControlTypes.EDITOR_PAD_PICK_PLACE | ControlTypes.CAMERACONTROLS, "CrewLight_InputLock");
 				} else {
 					InputLockManager.RemoveControlLock ("CrewLight_InputLock");
 				}
