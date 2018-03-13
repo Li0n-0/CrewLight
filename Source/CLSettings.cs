@@ -46,6 +46,7 @@ namespace CrewLight
 		public static bool useSunLightEVA = true;
 		public static bool onForEVASpace = false;
 		public static bool onForEVALanded = false;
+		//add always on
 
 		// Light Action Group :
 		public static bool disableCrewAG = true;

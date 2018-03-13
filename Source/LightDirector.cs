@@ -21,6 +21,10 @@ namespace CrewLight
 			// EVALight :
 			if (CLSettings.useSunLightEVA) {
 				GameEvents.onCrewOnEva.Add (SunLightEVA);
+				Vessel vessel = FlightGlobals.ActiveVessel;
+				if (vessel.isEVA) {
+					SunLightEVA (vessel, vessel.FindPartModulesImplementing<KerbalEVA> () [0]);
+				}
 			}
 
 			// MorseLight :
@@ -98,35 +102,40 @@ namespace CrewLight
 		{
 			if (eData.to.Modules.Contains<KerbalEVA> ())
 			{
-				if (CLSettings.onForEVASpace && (eData.from.vessel.situation == Vessel.Situations.ESCAPING 
-					|| eData.from.vessel.situation == Vessel.Situations.FLYING 
-					|| eData.from.vessel.situation == Vessel.Situations.ORBITING 
-					|| eData.from.vessel.situation == Vessel.Situations.SUB_ORBITAL)) {
+				SunLightEVA (eData.from.vessel, eData.to.Modules.GetModule<KerbalEVA> ());
+			}
+		}
 
-					eData.to.Modules.GetModule<KerbalEVA> ().lampOn = true;
-					return;
-				}
-				if (CLSettings.onForEVALanded && (eData.from.vessel.situation == Vessel.Situations.LANDED 
-					|| eData.from.vessel.situation == Vessel.Situations.PRELAUNCH 
-					|| eData.from.vessel.situation == Vessel.Situations.SPLASHED)) {
+		private void SunLightEVA (Vessel vessel, KerbalEVA kerbal)
+		{
+			if (CLSettings.onForEVASpace && (vessel.situation == Vessel.Situations.ESCAPING 
+				|| vessel.situation == Vessel.Situations.FLYING 
+				|| vessel.situation == Vessel.Situations.ORBITING 
+				|| vessel.situation == Vessel.Situations.SUB_ORBITAL)) {
 
-					eData.to.Modules.GetModule<KerbalEVA> ().lampOn = true;
-					return;
-				}
+				kerbal.lampOn = true;
+				return;
+			}
+			if (CLSettings.onForEVALanded && (vessel.situation == Vessel.Situations.LANDED 
+				|| vessel.situation == Vessel.Situations.PRELAUNCH 
+				|| vessel.situation == Vessel.Situations.SPLASHED)) {
 
-				bool isSunShine = false;
-				RaycastHit hit;
-				Vector3d vesselPos = eData.to.vessel.GetWorldPos3D ();
-				Vector3d sunPos = FlightGlobals.GetBodyByName ("Sun").position;
-				if (Physics.Raycast(vesselPos, sunPos, out hit, Mathf.Infinity, CLSettings.layerMask)) {
-					if (hit.transform.name == "Sun") {
-						isSunShine = true;
-					}
-				}
+				kerbal.lampOn = true;
+				return;
+			}
 
-				if (!isSunShine) {
-					eData.to.Modules.GetModule<KerbalEVA> ().lampOn = true;
+			bool isSunShine = false;
+			RaycastHit hit;
+			Vector3d vesselPos = vessel.GetWorldPos3D ();
+			Vector3d sunPos = FlightGlobals.GetBodyByName ("Sun").position;
+			if (Physics.Raycast(vesselPos, sunPos, out hit, Mathf.Infinity, CLSettings.layerMask)) {
+				if (hit.transform.name == "Sun") {
+					isSunShine = true;
 				}
+			}
+
+			if (!isSunShine) {
+				kerbal.lampOn = true;
 			}
 		}
 
