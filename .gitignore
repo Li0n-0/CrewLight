@@ -42,5 +42,6 @@
 *.log
 PartDatabase.cfg
 KSP/
+KSPandMH/
 *.userprefs
 Source/obj/
