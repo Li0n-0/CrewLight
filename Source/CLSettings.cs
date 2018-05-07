@@ -21,13 +21,15 @@ namespace CrewLight
 		// Distant Lightning :
 		public static bool useMorseCode = true;
 		public static bool onlyForControllable = false;
-		public static string morseCodeStr = "_._|...|.__.";
+		public static string morseCodeStr = "_._ ... .__.";
 		public static double distance = 200d;
 		public static float ditDuration = 1.1f;
 		public static float dahDuration = 2.5f;
 		public static float symbolSpaceDuration = 1.1f;
 		public static float letterSpaceDuration = 1.7f;
 		public static float wordSpaceDuration = 2.5f;
+		public static char letterSpaceChar = ' ';
+		public static char wordSpaceChar = '|';
 
 		// Sun Light :
 		public static bool useSunLight = true;
@@ -71,13 +73,13 @@ namespace CrewLight
 		public static int navWhite = 4;
 		public static int strobeWhite = 2;
 		// not exposed :
-		public static bool  inSunlight = true;
+		public static bool inSunlight = true;
 
 		// Motion Detector Light :
 		public static bool useMotionDetector = true;
 
 		// Internal :
-		public static List<int> morseCode;
+		public static List<MorseCode> morseCode;
 		public static int layerMask = (1 << 10 | 1 << 15); // Scaled & Local Scenery layer
 		public static int maxSearch = 200;
 
@@ -91,42 +93,42 @@ namespace CrewLight
 			}
 
 			// Check for nodes in settings file
-			if (! settingsNode.HasNode("Distant_Vessel_Morse_Code")) {
+			if (!settingsNode.HasNode ("Distant_Vessel_Morse_Code")) {
 				settingsNode.AddNode ("Distant_Vessel_Morse_Code");
 			}
 			nodeDistantVesselLight = settingsNode.GetNode ("Distant_Vessel_Morse_Code");
 
-			if (! settingsNode.HasNode("Sun_Light")) {
+			if (!settingsNode.HasNode ("Sun_Light")) {
 				settingsNode.AddNode ("Sun_Light");
 			}
 			nodeSunLight = settingsNode.GetNode ("Sun_Light");
 
-			if (! settingsNode.HasNode("EVA_Light")) {
+			if (!settingsNode.HasNode ("EVA_Light")) {
 				settingsNode.AddNode ("EVA_Light");
 			}
 			nodeEVALight = settingsNode.GetNode ("EVA_Light");
 
-			if (! settingsNode.HasNode("Light_Action_Group")) {
+			if (!settingsNode.HasNode ("Light_Action_Group")) {
 				settingsNode.AddNode ("Light_Action_Group");
 			}
 			nodeLightActionGroup = settingsNode.GetNode ("Light_Action_Group");
 
-			if (! settingsNode.HasNode("Toggle_Vessel_Lights_On_EVA")) {
+			if (!settingsNode.HasNode ("Toggle_Vessel_Lights_On_EVA")) {
 				settingsNode.AddNode ("Toggle_Vessel_Lights_On_EVA");
 			}
 			nodeVesselLightsOnEVA = settingsNode.GetNode ("Toggle_Vessel_Lights_On_EVA");
 
-			if (! settingsNode.HasNode ("Crew_Light")) {
+			if (!settingsNode.HasNode ("Crew_Light")) {
 				settingsNode.AddNode ("Crew_Light");
 			}
 			nodeTransferCrew = settingsNode.GetNode ("Crew_Light");
 
-			if (! settingsNode.HasNode ("Aviation_Lights")) {
+			if (!settingsNode.HasNode ("Aviation_Lights")) {
 				settingsNode.AddNode ("Aviation_Lights", "enhanced behavior for the lights from the mod Aviation Lights");
 			}
 			nodeAviationLights = settingsNode.GetNode ("Aviation_Lights");
 
-			if (! settingsNode.HasNode ("Motion_Detector_Light")) {
+			if (!settingsNode.HasNode ("Motion_Detector_Light")) {
 				settingsNode.AddNode ("Motion_Detector_Light");
 			}
 			nodeMotionDetector = settingsNode.GetNode ("Motion_Detector_Light");
@@ -147,51 +149,64 @@ namespace CrewLight
 			if (nodeDistantVesselLight.HasValue ("morse_code")) {
 				morseCodeStr = nodeDistantVesselLight.GetValue ("morse_code");
 			}
-			nodeDistantVesselLight.SetValue ("morse_code", morseCodeStr, 
+			nodeDistantVesselLight.SetValue ("morse_code", morseCodeStr,
 				"'.' for ti, '_' for taah, '|' for separate letters, ' ' for separate words", true);
-			
+
 			if (nodeDistantVesselLight.HasValue ("distance")) {
 				distance = Double.Parse (nodeDistantVesselLight.GetValue ("distance"));
 			}
-			nodeDistantVesselLight.SetValue ("distance", distance, 
+			nodeDistantVesselLight.SetValue ("distance", distance,
 				"distance at which the message begin, in meter, maximum 2000", true);
-			
+
 			if (nodeDistantVesselLight.HasValue ("dit")) {
 				ditDuration = float.Parse (nodeDistantVesselLight.GetValue ("dit"));
 			}
-			nodeDistantVesselLight.SetValue("dit", ditDuration, 
+			nodeDistantVesselLight.SetValue ("dit", ditDuration,
 				"duration of the light for the dit (.), in seconds", true);
-			
+
 			if (nodeDistantVesselLight.HasValue ("dah")) {
 				dahDuration = float.Parse (nodeDistantVesselLight.GetValue ("dah"));
 			}
-			nodeDistantVesselLight.SetValue ("dah", dahDuration, 
+			nodeDistantVesselLight.SetValue ("dah", dahDuration,
 				"duration of the light for the dah (_), in seconds", true);
-			
+
 			if (nodeDistantVesselLight.HasValue ("symbol_space")) {
 				symbolSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("symbol_space"));
 			}
-			nodeDistantVesselLight.SetValue ("symbol_space", symbolSpaceDuration, 
+			nodeDistantVesselLight.SetValue ("symbol_space", symbolSpaceDuration,
 				"duration of the darkness between two symbol, in seconds", true);
+
+			if (nodeDistantVesselLight.HasValue ("letter_space_char")) {
+				letterSpaceChar = nodeDistantVesselLight.GetValue ("letter_space_char") [0];
+			}
+			nodeDistantVesselLight.SetValue ("letter_space_char", letterSpaceDuration,
+				"character of the darkness between two letters in seconds", true);
 
 			if (nodeDistantVesselLight.HasValue ("letter_space")) {
 				letterSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("letter_space"));
 			}
-			nodeDistantVesselLight.SetValue ("letter_space", letterSpaceDuration, 
-				"duration of the darkness between two letters, '|', in seconds", true);
+			nodeDistantVesselLight.SetValue ("letter_space", letterSpaceDuration,
+				String.Format ("duration of the darkness between two letters, currently '{0}', in seconds", letterSpaceDuration), true);
+
+			if (nodeDistantVesselLight.HasValue ("word_space_char")) {
+				wordSpaceChar = nodeDistantVesselLight.GetValue ("word_space_char") [0];
+			}
+			nodeDistantVesselLight.SetValue ("word_space_char", letterSpaceDuration,
+				"character of the darkness between two letters in seconds", true);
 
 			if (nodeDistantVesselLight.HasValue ("word_space")) {
 				wordSpaceDuration = float.Parse (nodeDistantVesselLight.GetValue ("word_space"));
 			}
-			nodeDistantVesselLight.SetValue ("word_space", wordSpaceDuration, 
-				"duration of the darkness between two words, ' ', in seconds", true);
+			nodeDistantVesselLight.SetValue ("word_space", wordSpaceDuration,
+				String.Format ("duration of the darkness between two words, currently '{0}', in seconds", wordSpaceDuration), true);
+
 			//
 			// Sun Light
 			//
 			if (nodeSunLight.HasValue ("use_sun_light")) {
 				useSunLight = bool.Parse (nodeSunLight.GetValue ("use_sun_light"));
 			}
-			nodeSunLight.SetValue("use_sun_light", useSunLight, 
+			nodeSunLight.SetValue ("use_sun_light", useSunLight,
 				"lights will go on/off as the sun rise/fall", true);
 
 			if (nodeSunLight.HasValue ("use_depth_light")) {
@@ -214,7 +229,7 @@ namespace CrewLight
 			if (nodeSunLight.HasValue ("delay_in_low_timewarp")) {
 				delayLowTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_low_timewarp"));
 			}
-			nodeSunLight.SetValue ("delay_in_low_timewarp", delayLowTimeWarp, 
+			nodeSunLight.SetValue ("delay_in_low_timewarp", delayLowTimeWarp,
 				"delay between check of the sun position when in physic timewrap, increase for better performance, " +
 				"lower for a quicker response of the lights." +
 				"Is divided by the current warp-time speed", true);
@@ -222,7 +237,7 @@ namespace CrewLight
 			if (nodeSunLight.HasValue ("delay_in_high_timewarp")) {
 				delayHighTimeWarp = float.Parse (nodeSunLight.GetValue ("delay_in_high_timewarp"));
 			}
-			nodeSunLight.SetValue ("delay_in_high_timewarp", delayHighTimeWarp, 
+			nodeSunLight.SetValue ("delay_in_high_timewarp", delayHighTimeWarp,
 				"delay between check of the sun position when in on-rail timewrap, increase for better performance, " +
 				"lower for a quicker response of the lights", true);
 
@@ -258,19 +273,19 @@ namespace CrewLight
 			if (nodeEVALight.HasValue ("use_sunlight_for_EVA")) {
 				useSunLight = bool.Parse (nodeEVALight.GetValue ("use_sunlight_for_EVA"));
 			}
-			nodeEVALight.SetValue ("use_sunlight_for_EVA", useSunLightEVA, 
+			nodeEVALight.SetValue ("use_sunlight_for_EVA", useSunLightEVA,
 				"kerbal's headlights will go on/off as the sun rise/fall", true);
 
 			if (nodeEVALight.HasValue ("always_on_in_space")) {
 				onForEVASpace = bool.Parse (nodeEVALight.GetValue ("always_on_in_space"));
 			}
-			nodeEVALight.SetValue ("always_on_in_space", onForEVASpace, 
+			nodeEVALight.SetValue ("always_on_in_space", onForEVASpace,
 				"always turn on the headlights when EVA in space", true);
-			
+
 			if (nodeEVALight.HasValue ("always_on_landed")) {
 				onForEVALanded = bool.Parse (nodeEVALight.GetValue ("always_on_landed"));
 			}
-			nodeEVALight.SetValue ("always_on_landed", onForEVALanded, 
+			nodeEVALight.SetValue ("always_on_landed", onForEVALanded,
 				"always turn on the headlights when EVA landed", true);
 			//
 			// Light Action Group
@@ -278,13 +293,13 @@ namespace CrewLight
 			if (nodeLightActionGroup.HasValue ("disable_light_action_group_for_crew_part")) {
 				disableCrewAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_light_action_group_for_crew_part"));
 			}
-			nodeLightActionGroup.SetValue ("disable_light_action_group_for_crew_part", disableCrewAG, 
+			nodeLightActionGroup.SetValue ("disable_light_action_group_for_crew_part", disableCrewAG,
 				"remove crewable part from the Light Action Group", true);
-			
+
 			if (nodeLightActionGroup.HasValue ("disable_action_group_for_light_part")) {
 				disableAllAG = bool.Parse (nodeLightActionGroup.GetValue ("disable_action_group_for_light_part"));
 			}
-			nodeLightActionGroup.SetValue ("disable_action_group_for_light_part", disableAllAG, 
+			nodeLightActionGroup.SetValue ("disable_action_group_for_light_part", disableAllAG,
 				"remove all the light part from the Light Action Group", true);
 			//
 			// Toggle Vessel Light On EVA
@@ -297,13 +312,13 @@ namespace CrewLight
 			if (nodeVesselLightsOnEVA.HasValue ("toggle_symmetric_lights")) {
 				lightSymLights = bool.Parse (nodeVesselLightsOnEVA.GetValue ("toggle_symmetric_lights"));
 			}
-			nodeVesselLightsOnEVA.SetValue ("toggle_symmetric_lights", lightSymLights, 
+			nodeVesselLightsOnEVA.SetValue ("toggle_symmetric_lights", lightSymLights,
 				"if true all symmetrical lights will respond to the toggle", true);
-			
+
 			if (nodeVesselLightsOnEVA.HasValue ("enable_on_AviationLights_light")) {
 				onAviationLights = bool.Parse (nodeVesselLightsOnEVA.GetValue ("enable_on_AviationLights_light"));
 			}
-			nodeVesselLightsOnEVA.SetValue ("enable_on_AviationLights_lights", onAviationLights, 
+			nodeVesselLightsOnEVA.SetValue ("enable_on_AviationLights_lights", onAviationLights,
 				"AviationLights lights will use the preset defined below", true);
 			//
 			// Transfer Crew
@@ -311,7 +326,7 @@ namespace CrewLight
 			if (nodeTransferCrew.HasValue ("use_cabin_crew_lightning")) {
 				useTransferCrew = bool.Parse (nodeTransferCrew.GetValue ("use_cabin_crew_lightning"));
 			}
-			nodeTransferCrew.SetValue ("use_cabin_crew_lightning", useTransferCrew, 
+			nodeTransferCrew.SetValue ("use_cabin_crew_lightning", useTransferCrew,
 				"kerbal turns the light on in their cabin/pod", true);
 			//
 			// Aviation Lights
@@ -324,49 +339,49 @@ namespace CrewLight
 			if (nodeAviationLights.HasValue ("turn_on_beacon_light_with_engine")) {
 				beaconOnEngine = bool.Parse (nodeAviationLights.GetValue ("turn_on_beacon_light_with_engine"));
 			}
-			nodeAviationLights.SetValue ("turn_on_beacon_light_with_engine", beaconOnEngine, 
+			nodeAviationLights.SetValue ("turn_on_beacon_light_with_engine", beaconOnEngine,
 				"beacon light will go only when you push the throttle", true);
 
 			if (nodeAviationLights.HasValue ("beacon_amber")) {
 				beaconAmber = int.Parse (nodeAviationLights.GetValue ("beacon_amber"));
 			}
-			nodeAviationLights.SetValue ("beacon_amber", beaconAmber, 
+			nodeAviationLights.SetValue ("beacon_amber", beaconAmber,
 				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
 
 			if (nodeAviationLights.HasValue ("beacon_red")) {
 				beaconRed = int.Parse (nodeAviationLights.GetValue ("beacon_red"));
 			}
-			nodeAviationLights.SetValue ("beacon_red", beaconRed, 
+			nodeAviationLights.SetValue ("beacon_red", beaconRed,
 				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
 
 			if (nodeAviationLights.HasValue ("nav_blue")) {
 				navBlue = int.Parse (nodeAviationLights.GetValue ("nav_blue"));
 			}
-			nodeAviationLights.SetValue ("nav_blue", navBlue, 
+			nodeAviationLights.SetValue ("nav_blue", navBlue,
 				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
 
 			if (nodeAviationLights.HasValue ("nav_green")) {
 				navGreen = int.Parse (nodeAviationLights.GetValue ("nav_green"));
 			}
-			nodeAviationLights.SetValue ("nav_green", navGreen, 
+			nodeAviationLights.SetValue ("nav_green", navGreen,
 				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
 
 			if (nodeAviationLights.HasValue ("nav_red")) {
 				navRed = int.Parse (nodeAviationLights.GetValue ("nav_red"));
 			}
-			nodeAviationLights.SetValue ("nav_red", navRed, 
+			nodeAviationLights.SetValue ("nav_red", navRed,
 				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
 
 			if (nodeAviationLights.HasValue ("nav_white")) {
 				navWhite = int.Parse (nodeAviationLights.GetValue ("nav_white"));
 			}
-			nodeAviationLights.SetValue ("nav_white", navWhite, 
+			nodeAviationLights.SetValue ("nav_white", navWhite,
 				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
 
 			if (nodeAviationLights.HasValue ("strobe_white")) {
 				strobeWhite = int.Parse (nodeAviationLights.GetValue ("strobe_white"));
 			}
-			nodeAviationLights.SetValue ("strobe_white", strobeWhite, 
+			nodeAviationLights.SetValue ("strobe_white", strobeWhite,
 				"0 = off, 1 = flash, 2 = double flash, 3 = interval, 4 = on", true);
 			//
 			// Motion Detector Light
@@ -374,7 +389,7 @@ namespace CrewLight
 			if (nodeMotionDetector.HasValue ("use_motion_detector_light")) {
 				useMotionDetector = bool.Parse (nodeMotionDetector.GetValue ("use_motion_detector_light"));
 			}
-			nodeMotionDetector.SetValue ("use_motion_detector_light", useMotionDetector, 
+			nodeMotionDetector.SetValue ("use_motion_detector_light", useMotionDetector,
 				"enable the feature, lights must be set individualy, in flight or in the editor", true);
 
 			settingsNode.Save (KSPUtil.ApplicationRootPath + "GameData/CrewLight/PluginData/Settings.cfg");
@@ -384,23 +399,24 @@ namespace CrewLight
 
 		private static void ParseMorse ()
 		{
-			morseCode = new List<int> ();
+			morseCode = new List<MorseCode> ();
 			foreach (char c in morseCodeStr) {
 				switch (c) {
 				case '.':
-					morseCode.Add (0);
+					morseCode.Add (MorseCode.dih);
 					break;
 				case '_':
-					morseCode.Add (1);
+					morseCode.Add (MorseCode.daah);
 					break;
-				case '|':
-					morseCode.Add (2);
+				case '-':
+					morseCode.Add (MorseCode.daah);
 					break;
-				case ' ':
-					morseCode.Add (3);
+				default:
+					if (c == CLSettings.letterSpaceChar) morseCode.Add (MorseCode.letterspc);
+					else if (c == CLSettings.wordSpaceChar) morseCode.Add (MorseCode.wordspc);
 					break;
 				}
-				morseCode.Add (4);
+				morseCode.Add (MorseCode.symspc);
 			}
 		}
 	}
