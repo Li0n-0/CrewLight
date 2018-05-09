@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CrewLight
 {
-	public enum MorseCode { dih, daah, letterspc, wordspc, symspc };
+	public enum MorseCode { dih, dah, letterspc, wordspc, symspc };
 
 	public class MorseLight : MonoBehaviour
 	{
