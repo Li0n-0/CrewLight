@@ -86,3 +86,8 @@ Report it to [Github](https://github.com/Li0n-0/CrewLight) or the [KSP forum](ht
 **A big thanks to all the modders/users of the KSP forum who have helped me, directly and by answering question before I posted them** :wink:
 
 License is MIT
+
+
+## UPSTREAM
+
+https://github.com/Li0n-0/CrewLight.git
