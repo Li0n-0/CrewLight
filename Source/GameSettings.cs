@@ -54,7 +54,7 @@ namespace CrewLight
 		[GameParameters.CustomStringParameterUI ("\n\0", autoPersistance = false)]
 		public string dummy7 = "";
 
-		[GameParameters.CustomStringParameterUI (/*Morse Code*/"#autoLOC_CL_0022")]
+		[GameParameters.CustomStringParameterUI (/*Morse Code*/"#autoLOC_CL_0022", autoPersistance = false)]
 		public string dummy8 = "";
 
 		[GameParameters.CustomParameterUI (/*Morse Code*/"#autoLOC_CL_0022", toolTip = "#autoLOC_CL_0023")]
@@ -100,7 +100,7 @@ namespace CrewLight
 		[GameParameters.CustomStringParameterUI ("\n\0", autoPersistance = false)]
 		public string dummy5 = "";
 
-		[GameParameters.CustomStringParameterUI (/*Switch Light on EVA*/"#autoLOC_CL_0048")]
+		[GameParameters.CustomStringParameterUI (/*Switch Light on EVA*/"#autoLOC_CL_0048", autoPersistance = false)]
 		public string dummy6 = "";
 
 		[GameParameters.CustomParameterUI (/*Switch Light on EVA*/"#autoLOC_CL_0048", toolTip = "#autoLOC_CL_0049")]
@@ -117,7 +117,7 @@ namespace CrewLight
 		[GameParameters.CustomStringParameterUI ("\n\0", autoPersistance = false)]
 		public string dummy0 = "";
 
-		[GameParameters.CustomStringParameterUI (/*Kerbal Headlight*/"#autoLOC_CL_0044")]
+		[GameParameters.CustomStringParameterUI (/*Kerbal Headlight*/"#autoLOC_CL_0044", autoPersistance = false)]
 		public string dummy1 = "";
 
 		[GameParameters.CustomParameterUI (/*Kerbal Headlight*/"#autoLOC_CL_0044", toolTip = "#autoLOC_CL_0045")]

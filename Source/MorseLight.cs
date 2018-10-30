@@ -15,11 +15,16 @@ namespace CrewLight
 		private List<bool?> stateLight;
 		private double offLimit = 2600d;
 
+		private WaitForSeconds timer;
+		private bool isRunning = false;
+
 		private CL_GeneralSettings settings;
 
 		public void Start ()
 		{
 			settings = HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ();
+
+			timer = new WaitForSeconds (.5f);
 
 			vessel = this.GetComponent<Vessel> ();
 
@@ -48,7 +53,7 @@ namespace CrewLight
 		public void OnDestroy ()
 		{
 			StopAllCoroutines ();
-			LightPreviousState ();
+			if (isRunning) { LightPreviousState (); }
 		}
 
 		private double GetDistance ()
@@ -58,20 +63,20 @@ namespace CrewLight
 
 		private IEnumerator StartMorseLight ()
 		{
-			yield return StartCoroutine ("FindLightPart");
+			isRunning = true;
 
+			yield return StartCoroutine ("FindLightPart");
 			double vesselDistance = GetDistance ();
 			while (vesselDistance > settings.distance) {
 				if (vesselDistance > offLimit) {
 					Destroy (this);
 				}
-				yield return new WaitForSeconds (.5f);
+				yield return timer;
 				vesselDistance = GetDistance ();
 			}
 
 			SwitchLight.Off (modulesLight);
 			yield return new WaitForSeconds (settings.ditDuration);
-
 			// Morse message
 			foreach (MorseCode c in GameSettingsLive.morseCode) {
 				switch (c) {
@@ -97,8 +102,8 @@ namespace CrewLight
 					break;
 				}
 			}
-
 			LightPreviousState ();
+			isRunning = false;
 			Destroy (this);
 		}
 
