@@ -40,7 +40,8 @@ namespace CrewLight
 		{
 			if ((!HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ().useMotionDetector)/* || (!part.Modules.Contains<ModuleLight> ())*/) {
 				Events ["SetMotionDetector"].active = false;
-				Destroy (this);
+//				Destroy (this);
+				this.enabled = false;
 				return;
 			}
 
