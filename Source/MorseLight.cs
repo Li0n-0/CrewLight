@@ -15,8 +15,12 @@ namespace CrewLight
 		private List<bool?> stateLight;
 		private double offLimit = 2600d;
 
+		private CL_GeneralSettings settings;
+
 		public void Start ()
 		{
+			settings = HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ();
+
 			vessel = this.GetComponent<Vessel> ();
 
 			// Check for the right type
@@ -27,14 +31,14 @@ namespace CrewLight
 			}
 
 			// Check for controllable vessel
-			if (CLSettings.onlyForControllable) {
+			if (settings.onlyForControllable) {
 				if (!vessel.IsControllable) {
 					Destroy (this);
 				}
 			}
 
 			// Destroy if vessel are too close
-			if (GetDistance () < CLSettings.distance) {
+			if (GetDistance () < settings.distance) {
 				Destroy (this);
 			}
 
@@ -57,7 +61,7 @@ namespace CrewLight
 			yield return StartCoroutine ("FindLightPart");
 
 			double vesselDistance = GetDistance ();
-			while (vesselDistance > CLSettings.distance) {
+			while (vesselDistance > settings.distance) {
 				if (vesselDistance > offLimit) {
 					Destroy (this);
 				}
@@ -66,30 +70,30 @@ namespace CrewLight
 			}
 
 			SwitchLight.Off (modulesLight);
-			yield return new WaitForSeconds (CLSettings.ditDuration);
+			yield return new WaitForSeconds (settings.ditDuration);
 
 			// Morse message
-			foreach (MorseCode c in CLSettings.morseCode) {
+			foreach (MorseCode c in GameSettingsLive.morseCode) {
 				switch (c) {
 				case MorseCode.dih:
 					SwitchLight.On (modulesLight);
-					yield return new WaitForSeconds (CLSettings.ditDuration);
+					yield return new WaitForSeconds (settings.ditDuration);
 					break;
-				case MorseCode.daah:
+				case MorseCode.dah:
 					SwitchLight.On (modulesLight);
-					yield return new WaitForSeconds (CLSettings.dahDuration);
+					yield return new WaitForSeconds (settings.dahDuration);
 					break;
 				case MorseCode.letterspc:
 					SwitchLight.Off (modulesLight);
-					yield return new WaitForSeconds (CLSettings.letterSpaceDuration);
+					yield return new WaitForSeconds (settings.letterSpaceDuration);
 					break;
 				case MorseCode.wordspc:
 					SwitchLight.Off (modulesLight);
-					yield return new WaitForSeconds (CLSettings.wordSpaceDuration);
+					yield return new WaitForSeconds (settings.wordSpaceDuration);
 					break;
 				case MorseCode.symspc:
 					SwitchLight.Off (modulesLight);
-					yield return new WaitForSeconds (CLSettings.symbolSpaceDuration);
+					yield return new WaitForSeconds (settings.symbolSpaceDuration);
 					break;
 				}
 			}
@@ -134,7 +138,7 @@ namespace CrewLight
 
 			foreach (Part part in vessel.Parts) {
 				iSearch++;
-				if (iSearch >= CLSettings.maxSearch) {
+				if (iSearch >= GameSettingsLive.maxSearch) {
 					yield return new WaitForSeconds (.1f);
 					iSearch = 0;
 				}

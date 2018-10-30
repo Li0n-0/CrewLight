@@ -11,8 +11,9 @@ namespace CrewLight
 
 		void Start ()
 		{
-			disableCrewAG = CLSettings.disableCrewAG;
-			disableAllAG = CLSettings.disableAllAG;
+			CL_GeneralSettings settings = HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ();
+			disableCrewAG = settings.disableCrewAG;
+			disableAllAG = settings.disableAllAG;
 
 			if (disableCrewAG || disableAllAG) {
 				GameEvents.onEditorPartEvent.Add (CheckForLight);

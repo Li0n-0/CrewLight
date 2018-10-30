@@ -10,7 +10,8 @@ namespace CrewLight
 
 		public override void OnStart (StartState state)
 		{
-			if (! HighLogic.LoadedSceneIsFlight || ! CLSettings.beaconOnEngine) {
+			CL_AviationLightsSettings settings = HighLogic.CurrentGame.Parameters.CustomParams<CL_AviationLightsSettings> ();
+			if (! HighLogic.LoadedSceneIsFlight || ! settings.beaconOnEngine) {
 				Destroy (this);
 			}
 

@@ -3,13 +3,30 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using UnityEngine;
+using KSP.Localization;
 
 namespace CrewLight
 {
-	public static class SwitchLight
+	public/* static*/ class SwitchLight
 	{
+		private static CL_GeneralSettings generalSettings;
+		private static CL_AviationLightsSettings aviationLSettings;
+
+		private static bool settingsLoaded = false;
+
+		private static void LoadSettings ()
+		{
+			generalSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ();
+			aviationLSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_AviationLightsSettings> ();
+			settingsLoaded = true;
+		}
+
 		public static void On (PartModule light)
 		{
+			if (!settingsLoaded) {
+				LoadSettings ();
+			}
+
 			switch (light.moduleName) {
 			case "ModuleColorChanger":
 			case "ModuleColorChangerConsumer":
@@ -36,35 +53,35 @@ namespace CrewLight
 				light.GetType ().InvokeMember ("TurnOnLights", BindingFlags.InvokeMethod, null, light, null);
 				break;
 			case "ModuleNavLight":
-				if (CLSettings.useAviationLightsEffect && CLSettings.inSunlight) {
+				if (generalSettings.useAviationLightsEffect && GameSettingsLive.inSunlight) {
 					switch (light.part.name) {
 					case "lightbeacon.amber":
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
-							new object[] { CLSettings.beaconAmber });
+							new object[] { ParseNavLightStr (aviationLSettings.beaconAmber) });
 						break;
 					case "lightbeacon.red":
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
-							new object[] { CLSettings.beaconRed });
+							new object[] { ParseNavLightStr (aviationLSettings.beaconRed) });
 						break;
 					case "lightnav.blue":
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
-							new object[] { CLSettings.navBlue });
+							new object[] { ParseNavLightStr (aviationLSettings.navBlue) });
 						break;
 					case "lightnav.green":
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
-							new object[] { CLSettings.navGreen });
+							new object[] { ParseNavLightStr (aviationLSettings.navGreen) });
 						break;
 					case "lightnav.red":
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
-							new object[] { CLSettings.navRed });
+							new object[] { ParseNavLightStr (aviationLSettings.navRed) });
 						break;
 					case "lightnav.white":
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
-							new object[] { CLSettings.navWhite });
+							new object[] { ParseNavLightStr (aviationLSettings.navWhite) });
 						break;
 					case "lightstrobe.white":
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
-							new object[] { CLSettings.strobeWhite });
+							new object[] { ParseNavLightStr (aviationLSettings.strobeWhite) });
 						break;
 					default:
 						light.GetType ().InvokeMember ("navLightSwitch", BindingFlags.SetField, null, light, 
@@ -236,6 +253,35 @@ namespace CrewLight
 			default:
 				return false;
 			}
+		}
+
+		private static int ParseNavLightStr (string navLightStr)
+		{
+			int navLightInt;
+
+			switch (navLightStr)
+			{
+			case "#autoLOC_CL_0063"://off
+				navLightInt = 0;
+				break;
+			case "#autoLOC_CL_0064"://flash
+				navLightInt = 1;
+				break;
+			case "#autoLOC_CL_0065"://double-flash
+				navLightInt = 2;
+				break;
+			case "#autoLOC_CL_0066"://interval
+				navLightInt = 3;
+				break;
+			case "#autoLOC_CL_0067"://on
+				navLightInt = 4;
+				break;
+			default:
+				navLightInt = 4;
+				break;
+			}
+
+			return navLightInt;
 		}
 
 		private static void D (String str)
