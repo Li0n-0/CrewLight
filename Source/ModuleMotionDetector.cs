@@ -40,7 +40,6 @@ namespace CrewLight
 		{
 			if ((!HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ().useMotionDetector)/* || (!part.Modules.Contains<ModuleLight> ())*/) {
 				Events ["SetMotionDetector"].active = false;
-//				Destroy (this);
 				this.enabled = false;
 				return;
 			}
@@ -66,7 +65,7 @@ namespace CrewLight
 
 			// Create the cone :
 			detectionCone = GameObject.CreatePrimitive (PrimitiveType.Sphere);
-			detectionCone.layer = 1;
+			detectionCone.layer = 4;//was 1, changed in 1.17 for ksp 1.5.1
 			detectionCone.transform.SetParent (lights[0].transform);
 			detectionCone.transform.position = lights[0].transform.position;
 
