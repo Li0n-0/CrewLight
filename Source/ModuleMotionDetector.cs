@@ -38,7 +38,7 @@ namespace CrewLight
 
 		public override void OnStart (StartState state)
 		{
-			if ((!CLSettings.useMotionDetector)/* || (!part.Modules.Contains<ModuleLight> ())*/) {
+			if ((!HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ().useMotionDetector)/* || (!part.Modules.Contains<ModuleLight> ())*/) {
 				Events ["SetMotionDetector"].active = false;
 				Destroy (this);
 				return;

@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace CrewLight
 {
+	public enum MorseCode { dih, dah, letterspc, wordspc, symspc };
+
 	public class MorseLight : MonoBehaviour
 	{
 		private Vessel vessel;
@@ -13,26 +15,30 @@ namespace CrewLight
 		private List<bool?> stateLight;
 		private double offLimit = 2600d;
 
+		private CL_GeneralSettings settings;
+
 		public void Start ()
 		{
+			settings = HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ();
+
 			vessel = this.GetComponent<Vessel> ();
 
 			// Check for the right type
-			if (vessel.vesselType == VesselType.Debris || vessel.vesselType == VesselType.EVA 
+			if (vessel.vesselType == VesselType.Debris || vessel.vesselType == VesselType.EVA
 				|| vessel.vesselType == VesselType.Flag || vessel.vesselType == VesselType.SpaceObject) {
 
 				Destroy (this);
 			}
 
 			// Check for controllable vessel
-			if (CLSettings.onlyForControllable) {
+			if (settings.onlyForControllable) {
 				if (!vessel.IsControllable) {
 					Destroy (this);
 				}
 			}
 
 			// Destroy if vessel are too close
-			if (GetDistance() < CLSettings.distance) {
+			if (GetDistance () < settings.distance) {
 				Destroy (this);
 			}
 
@@ -54,40 +60,40 @@ namespace CrewLight
 		{
 			yield return StartCoroutine ("FindLightPart");
 
-			double vesselDistance = GetDistance();
-			while (vesselDistance > CLSettings.distance) {
+			double vesselDistance = GetDistance ();
+			while (vesselDistance > settings.distance) {
 				if (vesselDistance > offLimit) {
 					Destroy (this);
 				}
 				yield return new WaitForSeconds (.5f);
-				vesselDistance = GetDistance();
+				vesselDistance = GetDistance ();
 			}
 
 			SwitchLight.Off (modulesLight);
-			yield return new WaitForSeconds (CLSettings.ditDuration);
+			yield return new WaitForSeconds (settings.ditDuration);
 
 			// Morse message
-			foreach (int c in CLSettings.morseCode) {
+			foreach (MorseCode c in GameSettingsLive.morseCode) {
 				switch (c) {
-				case 0:
+				case MorseCode.dih:
 					SwitchLight.On (modulesLight);
-					yield return new WaitForSeconds (CLSettings.ditDuration);
+					yield return new WaitForSeconds (settings.ditDuration);
 					break;
-				case 1:
+				case MorseCode.dah:
 					SwitchLight.On (modulesLight);
-					yield return new WaitForSeconds (CLSettings.dahDuration);
+					yield return new WaitForSeconds (settings.dahDuration);
 					break;
-				case 2:
+				case MorseCode.letterspc:
 					SwitchLight.Off (modulesLight);
-					yield return new WaitForSeconds (CLSettings.letterSpaceDuration);
+					yield return new WaitForSeconds (settings.letterSpaceDuration);
 					break;
-				case 3:
+				case MorseCode.wordspc:
 					SwitchLight.Off (modulesLight);
-					yield return new WaitForSeconds (CLSettings.wordSpaceDuration);
+					yield return new WaitForSeconds (settings.wordSpaceDuration);
 					break;
-				case 4:
+				case MorseCode.symspc:
 					SwitchLight.Off (modulesLight);
-					yield return new WaitForSeconds (CLSettings.symbolSpaceDuration);
+					yield return new WaitForSeconds (settings.symbolSpaceDuration);
 					break;
 				}
 			}
@@ -103,9 +109,9 @@ namespace CrewLight
 				int i = 0;
 				foreach (bool? isOn in stateLight) {
 					if (isOn == null) {
-						if (modulesLight[i].part.CrewCapacity > 0) {
-							if (modulesLight[i].part.protoModuleCrew.Count > 0) {
-								SwitchLight.On (modulesLight[i].part);
+						if (modulesLight [i].part.CrewCapacity > 0) {
+							if (modulesLight [i].part.protoModuleCrew.Count > 0) {
+								SwitchLight.On (modulesLight [i].part);
 							} else {
 								SwitchLight.Off (modulesLight [i].part);
 							}
@@ -124,7 +130,7 @@ namespace CrewLight
 		{
 			modulesLight = new List<PartModule> ();
 
-			stateLight = new List<bool?>();
+			stateLight = new List<bool?> ();
 
 			int iSearch = -1;
 
@@ -132,7 +138,7 @@ namespace CrewLight
 
 			foreach (Part part in vessel.Parts) {
 				iSearch++;
-				if (iSearch >= CLSettings.maxSearch) {
+				if (iSearch >= GameSettingsLive.maxSearch) {
 					yield return new WaitForSeconds (.1f);
 					iSearch = 0;
 				}
@@ -145,7 +151,7 @@ namespace CrewLight
 				// Check for lightable modules
 				if (part.Modules.Contains<ModuleColorChanger> ()) {
 					ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();
-					if (Regex.IsMatch(partM.toggleName, "light", RegexOptions.IgnoreCase)) {
+					if (Regex.IsMatch (partM.toggleName, "light", RegexOptions.IgnoreCase)) {
 						modulesLight.Add (partM);
 						if (partM.animState) {
 							stateLight.Add (true);
@@ -155,7 +161,7 @@ namespace CrewLight
 					}
 				}
 				if (part.Modules.Contains<ModuleLight> ()) {
-					foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
+					foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight> ()) {
 						modulesLight.Add (partM);
 						if (partM.isOn) {
 							stateLight.Add (true);
@@ -165,8 +171,8 @@ namespace CrewLight
 					}
 				}
 				if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
-					foreach (ModuleAnimateGeneric partM in part.Modules.GetModules<ModuleAnimateGeneric>()) {
-						if (Regex.IsMatch(partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
+					foreach (ModuleAnimateGeneric partM in part.Modules.GetModules<ModuleAnimateGeneric> ()) {
+						if (Regex.IsMatch (partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
 							modulesLight.Add (partM);
 							if (partM.animSwitch == false) {
 								stateLight.Add (true);

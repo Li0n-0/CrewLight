@@ -29,7 +29,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CLSettings.cs" />
     <Compile Include="DisableLightAG.cs" />
     <Compile Include="LightDirector.cs" />
     <Compile Include="ModuleBeaconLightEngine.cs" />
@@ -38,15 +37,17 @@
     <Compile Include="SunLight.cs" />
     <Compile Include="SwitchLight.cs" />
     <Compile Include="ModuleMotionDetector.cs" />
+    <Compile Include="GameSettings.cs" />
+    <Compile Include="GameSettingsLive.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\KSPandMH\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System">
       <HintPath>..\KSPandMH\KSP_x64_Data\Managed\System.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\KSPandMH\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">

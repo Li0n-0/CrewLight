@@ -57,11 +57,20 @@ This mod rely on the light action group to determine which light belongs to whic
   
 ### How to modify how it works ?
   
-There is a file `Settings.cfg` in `Kerbal Space Program/GameData/CrewLight/PluginData/` with some variables to tweak, names and comment should be explicit enough. Most useful one are :
-* `morse_code` : change the morse message sent by distant vessel, [here](https://commons.wikimedia.org/wiki/File:International_Morse_Code.svg) you can find a Morse alphabet
-* `distance` : set the distance at which the Morse message begins
-* `only_light_not_in_AG` : if `False` every light will toggle according to sunlight
-* `always_on_in_space` : if `True` kerbal who disembark will always turn their lights on while on orbit
+Most of the function can be disabled, or tweaked, directly from the in-game settings screen : 
+ 
+![settings screen](https://i.imgur.com/1OoqY7n.png)
+ 
+There's also some extra option for the Morse Code message. 
+ 
+![more morse settings screen](https://i.imgur.com/z8QINGo.png)
+ 
+Due to limitation of the stock settings menu (or limitation to my modding skill :p ) it's a bit tricky to access it : in the settings screen enable the "More Morse Settings", hit accept, twice, and you got it.
+ 
+![how-to more morse settings](https://i.imgur.com/N8tFWe0.png)
+
+Here you can change the morse message send by distant vessel as you approch them. And the timing for the different symbol (they are sync to the dit duration unless you check manual timing).
+ 
   
   
 ### What is needed ?
@@ -86,3 +95,8 @@ Report it to [Github](https://github.com/Li0n-0/CrewLight) or the [KSP forum](ht
 **A big thanks to all the modders/users of the KSP forum who have helped me, directly and by answering question before I posted them** :wink:
 
 License is MIT
+
+
+## UPSTREAM
+
+https://github.com/Li0n-0/CrewLight.git

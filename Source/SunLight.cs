@@ -13,8 +13,16 @@ namespace CrewLight
 		private List<PartModule> modulesLight;
 		private bool inDark;
 
+		private CL_SunLightSettings settings;
+		private CL_GeneralSettings generalSettings;
+		private CL_AviationLightsSettings aviationLightsSettings;
+
 		public void Start ()
 		{
+			settings = HighLogic.CurrentGame.Parameters.CustomParams<CL_SunLightSettings> ();
+			generalSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ();
+			aviationLightsSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_AviationLightsSettings> ();
+
 			vessel = this.GetComponent<Vessel> ();
 
 			// Checking for the type cannot be done earlier unfortunalely, it won't be correctly assigned
@@ -38,7 +46,7 @@ namespace CrewLight
 			Vector3d sunPos = FlightGlobals.GetBodyByName ("Sun").position;
 			RaycastHit hit;
 
-			if (Physics.Raycast(vesselPos, sunPos, out hit, Mathf.Infinity, CLSettings.layerMask)) {
+			if (Physics.Raycast(vesselPos, sunPos, out hit, Mathf.Infinity, GameSettingsLive.layerMask)) {
 				if (hit.transform.name == "Sun") {
 					return true;
 				}
@@ -49,7 +57,7 @@ namespace CrewLight
 		private bool IsInDepth ()
 		{
 			if (vessel.LandedOrSplashed && FlightGlobals.currentMainBody.ocean) {
-				if (vessel.altitude < -CLSettings.depthThreshold) {
+				if (vessel.altitude < -settings.depthThreshold) {
 					return true;
 				}
 			}
@@ -59,10 +67,10 @@ namespace CrewLight
 		private void SetLights ()
 		{
 			// Depth Lights :
-			if (CLSettings.useDepthLight) {
+			if (settings.useDepthLight) {
 				if (IsInDepth ()) {
 					if (!inDark) {
-						if (CLSettings.useSunLight) {
+						if (settings.useSunLight) {
 							StartCoroutine ("StageLight");
 						} else {
 							SwitchLight.On (modulesLight);
@@ -82,7 +90,7 @@ namespace CrewLight
 				}
 			} else {
 				if (!inDark) {
-					if (CLSettings.useStaggerdLight) {
+					if (settings.useStaggeredLight) {
 						StartCoroutine ("StageLight");
 					} else {
 						SwitchLight.On (modulesLight);
@@ -101,9 +109,9 @@ namespace CrewLight
 			while (true) {
 				SetLights ();
 				if (TimeWarp.CurrentRate < 5f) {
-					yield return new WaitForSeconds (CLSettings.delayLowTimeWarp / TimeWarp.CurrentRate);
+					yield return new WaitForSeconds (settings.delayLowTimeWarp / TimeWarp.CurrentRate);
 				} else {
-					yield return new WaitForSeconds (CLSettings.delayHighTimeWarp);
+					yield return new WaitForSeconds (settings.delayHighTimeWarp);
 				}
 			}
 		}
@@ -112,10 +120,10 @@ namespace CrewLight
 		{
 			foreach (List<PartModule> stageList in SliceLightList ()) {
 				SwitchLight.On (stageList);
-				if (CLSettings.useRandomDelay) {
+				if (settings.useRandomDelay) {
 					yield return new WaitForSeconds (UnityEngine.Random.Range (.4f, 2f));
 				} else {
-					yield return new WaitForSeconds (CLSettings.delayStage);
+					yield return new WaitForSeconds (settings.delayStage);
 				}
 			}
 		}
@@ -127,7 +135,7 @@ namespace CrewLight
 
 			while (workingList.Count != 0) {
 				List<PartModule> stageList = new List<PartModule> ();
-				int rndLightInStage = UnityEngine.Random.Range (CLSettings.minLightPerStage, CLSettings.maxLightPerStage);
+				int rndLightInStage = UnityEngine.Random.Range (settings.minLightPerStage, settings.maxLightPerStage);
 				if (rndLightInStage > workingList.Count) {
 					rndLightInStage = workingList.Count;
 				}
@@ -151,7 +159,7 @@ namespace CrewLight
 
 			foreach (Part part in vessel.Parts) {
 				iSearch++;
-				if (iSearch >= CLSettings.maxSearch) {
+				if (iSearch >= GameSettingsLive.maxSearch) {
 					yield return new WaitForSeconds (.1f);
 					iSearch = 0;
 				}
@@ -162,12 +170,12 @@ namespace CrewLight
 				}
 
 				// Check if part is uncrewed
-				if (part.CrewCapacity == 0 || ! CLSettings.useTransferCrew) {
+				if (part.CrewCapacity == 0 || ! generalSettings.useTransferCrew) {
 
 					if (part.Modules.Contains<ModuleColorChanger> ()) {
 						ModuleColorChanger partM = part.Modules.GetModule<ModuleColorChanger> ();
 						if (Regex.IsMatch(partM.toggleName, "light", RegexOptions.IgnoreCase)) {
-							if (CLSettings.onlyNoAGpart) {
+							if (settings.onlyNoAGpart) {
 								if (!partM.Actions.Contains(KSPActionGroup.Light)) {
 									modulesLight.Add (partM);
 								}
@@ -178,7 +186,7 @@ namespace CrewLight
 					}
 					if (part.Modules.Contains<ModuleLight> ()) {
 						foreach (ModuleLight partM in part.Modules.GetModules<ModuleLight>()) {
-							if (CLSettings.onlyNoAGpart) {
+							if (settings.onlyNoAGpart) {
 								if (!partM.Actions.Contains(KSPActionGroup.Light)) {
 									modulesLight.Add (partM);
 								}
@@ -190,7 +198,7 @@ namespace CrewLight
 					if (part.Modules.Contains<ModuleAnimateGeneric> ()) {
 						foreach (ModuleAnimateGeneric partM in part.Modules.GetModules<ModuleAnimateGeneric>()) {
 							if (Regex.IsMatch(partM.actionGUIName, "light", RegexOptions.IgnoreCase)) {
-								if (CLSettings.onlyNoAGpart) {
+								if (settings.onlyNoAGpart) {
 									if (!partM.Actions.Contains(KSPActionGroup.Light)) {
 										modulesLight.Add (partM);
 									}
@@ -203,7 +211,7 @@ namespace CrewLight
 					if (part.Modules.Contains ("WBILight")) {
 						foreach (PartModule partM in part.Modules) {
 							if (partM.ClassName == "WBILight") {
-								if (CLSettings.onlyNoAGpart) {
+								if (settings.onlyNoAGpart) {
 									if (!partM.Actions.Contains(KSPActionGroup.Light)) {
 										modulesLight.Add (partM);
 									}
@@ -216,9 +224,9 @@ namespace CrewLight
 					if (part.Modules.Contains("ModuleNavLight")) {
 						foreach (PartModule partM in part.Modules) {
 							if (partM.ClassName == "ModuleNavLight") {
-								if (! CLSettings.beaconOnEngine 
+								if (! aviationLightsSettings.beaconOnEngine 
 								    || (part.name != "lightbeacon.amber" && part.name != "lightbeacon.red")) {
-									if (CLSettings.onlyNoAGpart) {
+									if (settings.onlyNoAGpart) {
 										if (!partM.Actions.Contains(KSPActionGroup.Light)) {
 											modulesLight.Add (partM);
 										}
@@ -232,7 +240,7 @@ namespace CrewLight
 					if (part.Modules.Contains ("ModuleKELight")) {
 						foreach (PartModule partM in part.Modules) {
 							if (partM.ClassName == "ModuleKELight") {
-								if (CLSettings.onlyNoAGpart) {
+								if (settings.onlyNoAGpart) {
 									if (!partM.Actions.Contains (KSPActionGroup.Light)) {
 										modulesLight.Add (partM);
 									}

@@ -9,17 +9,24 @@ namespace CrewLight
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
 	public class LightDirector : MonoBehaviour
 	{
+		private CL_GeneralSettings generalSettings;
+		private CL_SunLightSettings sunLightSettings;
+//		private CL_HeadlightSettings headLightSettings;
+
 		public void Start ()
 		{
+			generalSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ();
+			sunLightSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_SunLightSettings> ();
+//			headLightSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_HeadlightSettings> ();
 			// CrewLight :
-			if (CLSettings.useTransferCrew) {
+			if (generalSettings.useTransferCrew) {
 				GameEvents.onCrewTransferred.Add (CrewLightTransfer);
 				GameEvents.onVesselChange.Add (CrewLightVessel);
 				CrewLightVessel (FlightGlobals.ActiveVessel);
 			}
 
 			// EVALight :
-			if (CLSettings.useSunLightEVA) {
+			if (generalSettings.useSunLightEVA) {
 				GameEvents.onCrewOnEva.Add (SunLightEVA);
 				Vessel vessel = FlightGlobals.ActiveVessel;
 				if (vessel.isEVA) {
@@ -28,12 +35,12 @@ namespace CrewLight
 			}
 
 			// MorseLight :
-			if (CLSettings.useMorseCode) {
+			if (generalSettings.useMorseCode) {
 				GameEvents.onVesselLoaded.Add (MorseLightAddVessel);
 			}
 
 			// SunLight :
-			if (CLSettings.useSunLight) {
+			if (sunLightSettings.useSunLight) {
 				GameEvents.onVesselGoOffRails.Add (SunLightAddVessel);
 				GameEvents.onVesselCreate.Add (SunLightAddVessel);
 				GameEvents.onVesselPartCountChanged.Add (SunLightVesselChanged);
@@ -43,23 +50,23 @@ namespace CrewLight
 		public void OnDestroy ()
 		{
 			// CrewLight :
-			if (CLSettings.useTransferCrew) {
+			if (generalSettings.useTransferCrew) {
 				GameEvents.onCrewTransferred.Remove (CrewLightTransfer);
 				GameEvents.onVesselChange.Remove (CrewLightVessel);
 			}
 
 			// EVALight :
-			if (CLSettings.useSunLightEVA) {
+			if (generalSettings.useSunLightEVA) {
 				GameEvents.onCrewOnEva.Remove (SunLightEVA);
 			}
 
 			// MorseLight :
-			if (CLSettings.useMorseCode) {
+			if (generalSettings.useMorseCode) {
 				GameEvents.onVesselLoaded.Remove (MorseLightAddVessel);
 			}
 
 			// SunLight :
-			if (CLSettings.useSunLight) {
+			if (sunLightSettings.useSunLight) {
 				GameEvents.onVesselGoOffRails.Remove (SunLightAddVessel);
 				GameEvents.onVesselCreate.Remove (SunLightAddVessel);
 				GameEvents.onVesselPartCountChanged.Remove (SunLightVesselChanged);
@@ -108,7 +115,7 @@ namespace CrewLight
 
 		private void SunLightEVA (Vessel vessel, KerbalEVA kerbal)
 		{
-			if (CLSettings.onForEVASpace && (vessel.situation == Vessel.Situations.ESCAPING 
+			if (generalSettings.onForEVASpace && (vessel.situation == Vessel.Situations.ESCAPING 
 				|| vessel.situation == Vessel.Situations.FLYING 
 				|| vessel.situation == Vessel.Situations.ORBITING 
 				|| vessel.situation == Vessel.Situations.SUB_ORBITAL)) {
@@ -116,7 +123,7 @@ namespace CrewLight
 				kerbal.lampOn = true;
 				return;
 			}
-			if (CLSettings.onForEVALanded && (vessel.situation == Vessel.Situations.LANDED 
+			if (generalSettings.onForEVALanded && (vessel.situation == Vessel.Situations.LANDED 
 				|| vessel.situation == Vessel.Situations.PRELAUNCH 
 				|| vessel.situation == Vessel.Situations.SPLASHED)) {
 
@@ -128,7 +135,7 @@ namespace CrewLight
 			RaycastHit hit;
 			Vector3d vesselPos = vessel.GetWorldPos3D ();
 			Vector3d sunPos = FlightGlobals.GetBodyByName ("Sun").position;
-			if (Physics.Raycast(vesselPos, sunPos, out hit, Mathf.Infinity, CLSettings.layerMask)) {
+			if (Physics.Raycast(vesselPos, sunPos, out hit, Mathf.Infinity, GameSettingsLive.layerMask)) {
 				if (hit.transform.name == "Sun") {
 					isSunShine = true;
 				}

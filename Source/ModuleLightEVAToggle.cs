@@ -7,12 +7,17 @@ namespace CrewLight
 	public class ModuleLightEVAToggle : PartModule
 	{
 		private List<Part> ogSymPart;
+		private CL_GeneralSettings generalSettings;
+//		private CL_EVALightSettings evaSettings;
 
 		public override void OnStart (StartState state)
 		{
+			generalSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_GeneralSettings> ();
+//			evaSettings = HighLogic.CurrentGame.Parameters.CustomParams<CL_EVALightSettings> ();
+
 			if ((part.Modules.Contains<ModuleLight> () || part.Modules.Contains ("ModuleKELight") 
-				|| (part.Modules.Contains ("ModuleNavLight") && CLSettings.onAviationLights)) 
-				&& CLSettings.useVesselLightsOnEVA) {
+				|| (part.Modules.Contains ("ModuleNavLight") && generalSettings.onAviationLights)) 
+				&& generalSettings.useVesselLightsOnEVA) {
 				ogSymPart = new List<Part> (part.symmetryCounterparts);
 			} else {
 				Destroy (this);
@@ -22,7 +27,7 @@ namespace CrewLight
 		[KSPEvent (active = true, guiActiveUnfocused = true, externalToEVAOnly = true, guiName = "Toggle Light")]
 		public void LightToggleEVA ()
 		{
-			if (! CLSettings.lightSymLights) {
+			if (! generalSettings.lightSymLights) {
 				// Remove the symmetry counter parts before lightning, then add them back
 				part.symmetryCounterparts.Clear ();
 			}
@@ -60,7 +65,7 @@ namespace CrewLight
 				}
 			}
 
-			if (! CLSettings.lightSymLights) {
+			if (! generalSettings.lightSymLights) {
 				part.symmetryCounterparts = ogSymPart;
 			}
 		}
