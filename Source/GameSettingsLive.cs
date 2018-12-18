@@ -20,6 +20,7 @@ namespace CrewLight
 		private string bckCode;
 		private float bckDih, bckDah, bckSymSpace, bckLetterSpace, bckWordSpace;
 		private bool bckManual;
+		private bool restoreBck = true;
 
 		// window pos
 		Vector2d windowPos;
@@ -69,6 +70,7 @@ namespace CrewLight
 		private void OutOfPause ()
 		{
 			CloseSettings ();
+			restoreBck = true;
 		}
 
 		private void SettingsApplied ()
@@ -140,6 +142,7 @@ namespace CrewLight
 				}
 				morseCode.Add (MorseCode.symspc);
 			}
+
 		}
 
 		private void ApplySettings ()
@@ -147,14 +150,18 @@ namespace CrewLight
 			ParseSettings ();
 
 			morseSettings.Save (HighLogic.CurrentGame.config);
-
 			showSettingsWindow = false;
 			showAlphabetWindow = false;
+
+			restoreBck = false;
 		}
 
 		private void CloseSettings ()
 		{
-			RestoreBackup ();
+			if (restoreBck)
+			{
+				RestoreBackup ();
+			}
 
 			showSettingsWindow = false;
 			showAlphabetWindow = false;
